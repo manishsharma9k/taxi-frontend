@@ -3,6 +3,7 @@ import { ShieldCheck, Clock, Wallet, CheckCircle, CarFront, Download, Eye, EyeOf
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { usePageContent } from '../hooks/usePageContent';
+import './DrivePage.css';
 
 const DrivePage = () => {
   const { user } = useContext(AuthContext);
@@ -142,8 +143,8 @@ const DrivePage = () => {
   return (
     <div className="landing-page">
       {/* Hero Section */}
-      <section style={{ position: 'relative', paddingTop: '8rem', paddingBottom: '6rem', overflow: 'hidden', background: 'var(--bg)' }}>
-        <div className="container features-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', justifyItems: 'center', textAlign: 'center' }}>
+      <section style={{ position: 'relative', paddingTop: 'clamp(4rem, 6vw, 8rem)', paddingBottom: 'clamp(3rem, 5vw, 6rem)', overflow: 'hidden', background: 'var(--bg)' }}>
+        <div className="container features-grid drive-form-container" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', justifyItems: 'center', textAlign: 'center' }}>
           
           <div className="animate-fade-in-up" style={{ maxWidth: '840px', margin: '0 auto' }}>
             <div style={{ marginBottom: '2rem' }} className="ml-60">
@@ -161,8 +162,8 @@ const DrivePage = () => {
               Zero registration fees. Daily payouts. Flexible timings. Join India's fastest-growing ride-sharing network and start earning today.
             </p>
             
-            <div className="delay-200 animate-fade-in-up" style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem', animationFillMode: 'both', justifyContent: 'center' }}>
-              <button onClick={scrollToForm} className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>
+            <div className="delay-200 animate-fade-in-up" style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem', animationFillMode: 'both', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button onClick={scrollToForm} className="btn btn-primary" style={{ padding: 'clamp(0.6rem, 2vw, 1rem) clamp(1rem, 4vw, 2rem)', fontSize: 'clamp(0.9rem, 2vw, 1.1rem)', minWidth: '200px' }}>
                 <CheckCircle size={20} /> Register as Captain
               </button>
             </div>
@@ -177,7 +178,7 @@ const DrivePage = () => {
             </section>
           )}
 
-          <div ref={formRef} className="delay-300 animate-fade-in-up glass-panel" style={{ padding: '3rem 2rem', textAlign: 'center', animationFillMode: 'both' }}>
+          <div ref={formRef} className="delay-300 animate-fade-in-up glass-panel drive-form-section" style={{ padding: 'clamp(1.25rem, 5vw, 3rem) clamp(1rem, 4vw, 2rem)', textAlign: 'center', animationFillMode: 'both', maxWidth: '800px', margin: '0 auto' }}>
              <h2 style={{ fontSize: '2rem', marginBottom: '1rem', fontWeight: '800' }}>Earn up to <span className="text-primary">₹30,000/mo</span></h2>
              <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Sign up takes less than 2 minutes. Enter your details to get started.</p>
              

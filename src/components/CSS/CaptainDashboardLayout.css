@@ -538,6 +538,125 @@
   .cdl-rides-grid { grid-template-columns: 1fr; }
   .cdl-profile-grid { grid-template-columns: 1fr; }
 }
+
 @media (max-width: 480px) {
-  .cdl-stats-grid { grid-template-columns: 1fr; }
+  .cdl-layout { overflow: auto; height: auto; min-height: 100vh; }
+  
+  .cdl-sidebar {
+    width: 70px;
+    padding: 12px 8px;
+    align-items: center;
+  }
+
+  .cdl-logo-row { justify-content: center; margin-bottom: 12px; }
+  .cdl-logo-text { display: none; }
+  .cdl-toggle { font-size: 15px; }
+
+  .cdl-online-btn {
+    width: 100%;
+    padding: 9px 8px;
+    font-size: 0.7rem;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .cdl-menu {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .cdl-menu li {
+    justify-content: center;
+    padding: 10px 8px;
+    gap: 0;
+    font-size: 0.7rem;
+  }
+
+  .cdl-menu-text { display: none; }
+
+  .cdl-logout-btn {
+    width: 100%;
+    padding: 10px 8px;
+    justify-content: center;
+    font-size: 0.7rem;
+    margin-top: 8px;
+  }
+
+  .cdl-header {
+    padding: 0 12px;
+    height: 56px;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .cdl-header-title { font-size: 0.95rem; }
+  .cdl-header-sub { font-size: 0.65rem; }
+
+  .cdl-header-right {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .cdl-vehicle-chip {
+    padding: 4px 8px;
+    font-size: 0.65rem;
+  }
+
+  .cdl-body { padding: 12px 10px; }
+
+  .cdl-stats-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+
+  .cdl-stat-card {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .cdl-stat-value { font-size: 1.5rem; }
+  .cdl-stat-label { font-size: 0.7rem; }
+  .cdl-stat-change { font-size: 0.65rem; }
+
+  .cdl-rides-grid { grid-template-columns: 1fr; }
+  .cdl-ride-card { padding: 12px; border-radius: 10px; }
+
+  .cdl-ride-info { font-size: 0.8rem; }
+  .cdl-ride-amount { font-size: 1.1rem; }
+
+  .cdl-profile-grid { grid-template-columns: 1fr; }
+  .cdl-profile-card { padding: 1rem; }
+
+  .cdl-profile-avatar { width: 60px; height: 60px; font-size: 1.5rem; }
+  .cdl-profile-name { font-size: 1rem; }
+  .cdl-profile-email { font-size: 0.75rem; }
+
+  .cdl-profile-badge { padding: 4px 10px; font-size: 0.7rem; }
+
+  .cdl-btn { padding: 0.6rem 1rem; font-size: 0.8rem; }
+
+  table {
+    font-size: 0.75rem;
+  }
+
+  table th, table td {
+    padding: 8px 6px;
+  }
+
+  /* Approval sections */
+  .cdl-approval-chip { padding: 4px 8px; font-size: 0.7rem; }
+
+  .cdl-form-group { margin-bottom: 0.8rem; }
+  .cdl-form-group label { font-size: 0.8rem; }
+  .cdl-form-group input,
+  .cdl-form-group select,
+  .cdl-form-group textarea {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  /* Ensure touch targets are at least 44px */
+  button, a, input[type="button"], input[type="submit"] {
+    min-height: 44px;
+  }
+
+  /* Modal responsive */
+  .cdl-modal { width: 95vw !important; max-width: 95vw; }
 }

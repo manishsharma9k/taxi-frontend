@@ -1,0 +1,318 @@
+/* ─── DRIVE PAGE RESPONSIVE STYLES ─── */
+
+.drive-form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.drive-hero-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.drive-form-section {
+  padding: 2rem;
+  border-radius: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.drive-form-group {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.drive-form-group input,
+.drive-form-group select {
+  flex: 1;
+}
+
+.drive-progress-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.drive-progress-step {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.3s;
+}
+
+.drive-progress-step.active {
+  background: var(--primary);
+}
+
+/* ─── TABLET RESPONSIVE (768px - 1024px) ─── */
+@media (max-width: 1024px) {
+  .drive-form-section {
+    padding: 2rem 1.5rem;
+  }
+
+  .drive-form-group {
+    gap: 0.6rem;
+  }
+
+  .drive-hero-section {
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* ─── MOBILE MEDIUM (480px - 768px) ─── */
+@media (max-width: 768px) and (min-width: 480px) {
+  .drive-form-section {
+    padding: 1.5rem 1.25rem;
+    border-radius: 12px;
+  }
+
+  .drive-form-group {
+    gap: 0.5rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .drive-form-group input,
+  .drive-form-group select {
+    padding: 0.7rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .drive-hero-section {
+    margin-bottom: 1.25rem;
+    padding: 0 0.5rem;
+  }
+
+  .drive-hero-section .title {
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .drive-hero-section .subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .drive-form-section form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  button[type="submit"] {
+    width: 100%;
+  }
+}
+
+/* ─── MOBILE SMALL (< 480px) ─── */
+@media (max-width: 480px) {
+  .landing-page {
+    padding-top: 56px;
+  }
+
+  .drive-hero-section {
+    padding: 0 0.75rem;
+    margin-bottom: 1rem;
+    margin-top: -1rem;
+  }
+
+  .drive-hero-section img {
+    height: 100px !important;
+    width: 100px !important;
+    margin-bottom: 1rem;
+  }
+
+  .drive-hero-section .title {
+    font-size: 1.4rem;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+
+  .drive-hero-section .subtitle {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+
+  .drive-form-section {
+    padding: 1.25rem 1rem;
+    margin: 0 0.75rem 1.5rem;
+    border-radius: 12px;
+  }
+
+  .drive-form-group {
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 0.8rem;
+  }
+
+  .drive-form-group input,
+  .drive-form-group select {
+    width: 100%;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 8px;
+  }
+
+  .drive-progress-bar {
+    margin-bottom: 1rem;
+  }
+
+  .drive-progress-step {
+    height: 3px;
+  }
+
+  .drive-form-section form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .drive-form-section h2 {
+    font-size: 1.3rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .drive-form-section p {
+    font-size: 0.85rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .drive-form-section form label {
+    font-size: 0.8rem;
+    text-align: left;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  .drive-form-section form input,
+  .drive-form-section form select {
+    width: 100%;
+  }
+
+  /* Status messages */
+  .drive-form-section > div:first-of-type {
+    font-size: 0.8rem;
+    padding: 0.75rem !important;
+  }
+
+  /* Success message */
+  .drive-form-section .animate-fade-in-up {
+    padding: 1rem 0.75rem;
+  }
+
+  .drive-form-section .animate-fade-in-up > div {
+    font-size: 2rem;
+    width: 64px;
+    height: 64px;
+  }
+
+  .drive-form-section .animate-fade-in-up h3 {
+    font-size: 1.1rem !important;
+  }
+
+  .drive-form-section .animate-fade-in-up p {
+    font-size: 0.8rem !important;
+  }
+
+  .drive-form-section .animate-fade-in-up ul {
+    font-size: 0.8rem;
+    padding-left: 1rem;
+  }
+
+  /* Password visibility toggle */
+  .drive-form-section input[type="password"] {
+    padding-right: 0.5rem;
+  }
+
+  /* Button styles */
+  .btn {
+    width: 100%;
+    padding: 0.65rem 1rem !important;
+    font-size: 0.85rem;
+    min-height: 44px;
+  }
+
+  .btn-primary {
+    width: 100%;
+  }
+
+  /* Select dropdown touch-friendly */
+  select {
+    font-size: 1.1rem;
+    padding: 0.65rem 0.75rem;
+  }
+}
+
+/* ─── EXTRA SMALL (< 360px) ─── */
+@media (max-width: 360px) {
+  .drive-hero-section img {
+    height: 80px !important;
+    width: 80px !important;
+  }
+
+  .drive-hero-section .title {
+    font-size: 1.25rem;
+  }
+
+  .drive-hero-section .subtitle {
+    font-size: 0.8rem;
+  }
+
+  .drive-form-section {
+    padding: 1rem 0.75rem;
+    margin: 0 0.5rem 1rem;
+  }
+
+  .drive-form-group input,
+  .drive-form-group select {
+    padding: 0.6rem 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  .btn {
+    padding: 0.6rem 0.8rem !important;
+    font-size: 0.8rem;
+  }
+}
+
+/* ─── LANDSCAPE MOBILE ─── */
+@media (max-height: 600px) and (max-width: 1024px) {
+  .landing-page {
+    padding-top: 56px;
+  }
+
+  .drive-hero-section {
+    margin-bottom: 0.5rem;
+  }
+
+  .drive-hero-section img {
+    height: 80px !important;
+    width: 80px !important;
+  }
+
+  .drive-hero-section .title {
+    font-size: 1.3rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .drive-hero-section .subtitle {
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .drive-form-section {
+    padding: 1rem 0.75rem;
+  }
+
+  .drive-form-group {
+    margin-bottom: 0.6rem;
+  }
+
+  .btn {
+    padding: 0.5rem 0.8rem !important;
+    font-size: 0.8rem;
+  }
+}

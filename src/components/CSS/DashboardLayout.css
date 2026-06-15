@@ -857,3 +857,260 @@
   cursor: not-allowed;
   background: #f1f5f9;
 }
+
+/* ─── MOBILE-FIRST RESPONSIVE ENHANCEMENTS ─── */
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .sidebar { padding: 14px 12px; }
+  .logo-text { font-size: 1rem; }
+  .menu li { padding: 11px 12px; font-size: 0.9rem; }
+  .content-header { padding: 16px 18px; }
+  .content-header h1 { font-size: 1.5rem; }
+  .content-wrapper { padding: 20px 16px; }
+}
+
+/* Small devices (480px - 768px) */
+@media (max-width: 768px) and (min-width: 480px) {
+  .dashboard-layout {
+    overflow: auto;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    width: 100%;
+    padding: 12px 10px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    height: auto;
+  }
+
+  .logo-container { width: 100%; margin-bottom: 10px; }
+  .logo-text { font-size: 0.95rem; }
+  .toggle-btn { font-size: 18px; }
+  
+  .menu {
+    width: 100%;
+    gap: 6px;
+    padding-bottom: 0;
+  }
+
+  .menu li {
+    flex: 0 0 calc(50% - 3px);
+    padding: 10px 8px;
+    font-size: 0.85rem;
+    border-radius: 10px;
+  }
+
+  .menu-icon { font-size: 15px; }
+  .menu-text { font-size: 0.8rem; }
+
+  .logout-btn {
+    flex: 0 0 100%;
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    font-size: 0.85rem;
+  }
+
+  .content-header {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 12px;
+    height: auto;
+  }
+
+  .header-left { width: 100%; }
+  .content-header h1 { font-size: 1.3rem; }
+
+  .admin-profile { flex-direction: column; gap: 4px; }
+  .avatar { width: 32px; height: 32px; font-size: 0.85rem; }
+  .profile-label { font-size: 0.75rem; }
+
+  .content-wrapper { padding: 14px 10px; }
+
+  /* Tables on mobile */
+  .admin-table-container { padding: 12px; border-radius: 10px; }
+  .admin-table { font-size: 0.8rem; }
+  .admin-table th,
+  .admin-table td { padding: 10px 6px; }
+
+  /* Forms on mobile */
+  form { gap: 10px; }
+  .input-field { padding: 0.7rem 0.8rem; font-size: 0.9rem; }
+
+  /* Buttons on mobile */
+  .btn { padding: 0.6rem 1rem; font-size: 0.85rem; }
+
+  .pagination-container { flex-direction: column; gap: 12px; }
+  .pagination-info { font-size: 0.8rem; }
+  .pagination-btn { padding: 6px 12px; font-size: 0.8rem; }
+}
+
+/* Extra small devices (< 480px) */
+@media (max-width: 480px) {
+  .dashboard-layout {
+    overflow: auto;
+    height: auto;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    padding: 10px 8px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    height: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .logo-container {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 0;
+  }
+
+  .logo-text { font-size: 0.85rem; display: none; }
+  .logo-icon { font-size: 1.2rem; }
+  .toggle-btn { font-size: 16px; }
+
+  .menu {
+    width: 100%;
+    gap: 4px;
+    padding: 0;
+    margin-top: 0;
+    flex-wrap: wrap;
+  }
+
+  .menu li {
+    flex: 0 0 calc(33.333% - 3px);
+    padding: 8px 6px;
+    font-size: 0.7rem;
+    border-radius: 8px;
+    justify-content: center;
+  }
+
+  .menu-icon { font-size: 14px; }
+  .menu-text { display: none; }
+
+  .dashboard-layout.collapsed .menu li { justify-content: center; }
+  .dashboard-layout.collapsed .menu-text { display: none; }
+
+  .logout-btn {
+    flex: 0 0 100%;
+    width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+    font-size: 0.75rem;
+    justify-content: center;
+  }
+
+  .content-header {
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 10px;
+    height: auto;
+  }
+
+  .header-left { width: 100%; text-align: center; }
+  .content-header h1 { font-size: 1.1rem; margin: 0; }
+  .back-button { padding: 0.5rem 0.75rem; font-size: 0.8rem; }
+
+  .admin-profile {
+    flex-direction: row;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+
+  .profile-label { display: none; }
+
+  .content-wrapper {
+    padding: 12px 10px;
+    overflow-x: hidden;
+  }
+
+  /* Tables scrollable */
+  .admin-table-container {
+    padding: 10px;
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+
+  .admin-table {
+    font-size: 0.75rem;
+    min-width: 100%;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 8px 4px;
+    word-break: break-word;
+  }
+
+  .admin-table th { background: #f8fafc; }
+
+  /* Form optimizations */
+  form { gap: 8px; }
+  .input-field { padding: 0.65rem 0.75rem; font-size: 0.85rem; }
+  
+  /* Button optimizations */
+  .btn {
+    padding: 0.55rem 0.9rem;
+    font-size: 0.8rem;
+    width: 100%;
+  }
+
+  .btn-outline, .btn-ghost { width: 100%; }
+
+  /* Dropdowns and selections */
+  select, textarea { font-size: 1.1rem; }
+
+  /* Profile menu on mobile */
+  .profile-menu {
+    right: 0;
+    min-width: 240px;
+  }
+
+  .profile-menu-card {
+    padding: 12px;
+  }
+
+  .profile-menu-card-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
+
+  .profile-menu-card-name { font-size: 0.85rem; }
+  .profile-menu-card-email { font-size: 0.75rem; }
+
+  /* Pagination on mobile */
+  .pagination-container {
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 12px;
+  }
+
+  .pagination-info { font-size: 0.75rem; text-align: center; }
+  .pagination-controls { width: 100%; justify-content: center; gap: 4px; }
+  .pagination-btn { padding: 6px 10px; font-size: 0.75rem; flex: 1; }
+
+  /* Cards and panels */
+  .glass-panel { border-radius: 8px; }
+
+  /* Modals and dialogs */
+  .modal { width: 95vw !important; max-width: 95vw; }
+
+  /* Improve touch targets */
+  button, a, input[type="button"], input[type="submit"] {
+    min-height: 44px;
+  }
+}
