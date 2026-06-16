@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaPlus, FaTrash, FaSave } from 'react-icons/fa';
+import { API_URL } from '../api.js';
 
 const AdminHeaderLinks = () => {
   const [links, setLinks] = useState([]);
@@ -36,7 +37,7 @@ const AdminHeaderLinks = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/header-links');
+      const res = await axios.get(`${API_URL}/api/admin/header-links`);
       setLinks(res.data);
     } catch (err) {
       console.error(err);
@@ -59,7 +60,7 @@ const AdminHeaderLinks = () => {
         ...link,
         path: link.path?.startsWith('/') ? link.path : `/${link.path}`,
       };
-      await axios.put(`http://localhost:5000/api/admin/header-links/${linkId}`, payload, getAuthConfig());
+      await axios.put(`${API_URL}/api/admin/header-links/${linkId}`, payload, getAuthConfig());
       fetchLinks();
     } catch (err) {
       console.error(err);
@@ -72,7 +73,7 @@ const AdminHeaderLinks = () => {
     const confirmDelete = window.confirm('Delete this header link?');
     if (!confirmDelete) return;
     try {
-      await axios.delete(`http://localhost:5000/api/admin/header-links/${linkId}`, getAuthConfig());
+      await axios.delete(`${API_URL}/api/admin/header-links/${linkId}`, getAuthConfig());
       fetchLinks();
     } catch (err) {
       console.error(err);
@@ -91,7 +92,7 @@ const AdminHeaderLinks = () => {
         ...newLink,
         path: newLink.path.startsWith('/') ? newLink.path : `/${newLink.path}`,
       };
-      await axios.post('http://localhost:5000/api/admin/header-links', payload, getAuthConfig());
+      await axios.post(`${API_URL}/api/admin/header-links`, payload, getAuthConfig());
       setNewLink({ label: '', path: '', visible: true, order: links.length + 1 });
       fetchLinks();
     } catch (err) {

@@ -4,6 +4,7 @@ import { Mail, User, BookOpen, MessageSquare, Send, MapPin } from 'lucide-react'
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { usePageContent } from '../hooks/usePageContent';
+import { API_URL } from '../api.js';
 
 const ContactPage = () => {
     const { pageContent } = usePageContent('/contact');
@@ -20,7 +21,7 @@ const ContactPage = () => {
         setLoading(true);
         setStatus('');
         try {
-            await axios.post('http://localhost:5000/api/contact/submit', formData);
+            await axios.post(`${API_URL}/api/contact/submit`, formData);
             setStatus('success');
             setFormData({ name: '', email: '', subject: '', message: '', userType: 'customer' });
         } catch (error) {

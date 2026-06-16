@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { FaCheckCircle, FaTimesCircle, FaPhone, FaMapMarkerAlt, FaArrowRight, FaBolt, FaExclamationTriangle } from 'react-icons/fa';
 import Swal from 'sweetalert2';
+import { API_URL } from '../api.js';
 
 const VEHICLE_ICONS = { bike: '🏍️', auto: '🛺', cab: '🚗' };
 
@@ -14,13 +15,13 @@ const CaptainActiveRides = ({ isOnline }) => {
 
   const fetchPending = useCallback(() => {
     if (!token) return;
-    fetch('http://localhost:5000/api/rides/pending', { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_URL}/api/rides/pending`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json()).then(d => Array.isArray(d) && setPendingRides(d)).catch(() => {});
   }, [token]);
 
   const fetchActive = useCallback(() => {
     if (!token) return;
-    fetch('http://localhost:5000/api/rides/active', { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_URL}/api/rides/active`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json()).then(d => { if (d.activeRide) { setActiveRide(d.activeRide); setView('active'); } }).catch(() => {});
   }, [token]);
 
@@ -33,7 +34,7 @@ const CaptainActiveRides = ({ isOnline }) => {
 
   const acceptRide = async (rideId) => {
     try {
-      const res = await fetch('http://localhost:5000/api/rides/accept', {
+      const res = await fetch(`${API_URL}/api/rides/accept`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ rideId }),
@@ -48,7 +49,7 @@ const CaptainActiveRides = ({ isOnline }) => {
     try {
       const payload = { rideId: activeRide._id, status };
       if (otp) payload.otp = otp;
-      const res = await fetch('http://localhost:5000/api/rides/status', {
+      const res = await fetch(`${API_URL}/api/rides/status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
@@ -113,7 +114,7 @@ const CaptainActiveRides = ({ isOnline }) => {
     if (!reason) return;
     setCancelling(true);
     try {
-      const res = await fetch('http://localhost:5000/api/rides/captain-cancel', {
+      const res = await fetch(`${API_URL}/api/rides/captain-cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ rideId: activeRide._id, cancelReason: reason }),

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { API_URL } from '../api.js';
 
-const API_BASE = 'http://localhost:5000/api/admin';
+const API_BASE = `${API_URL}/api/admin`;
 
 export const usePageContent = (pagePath) => {
   const [pageContent, setPageContent] = useState(null);

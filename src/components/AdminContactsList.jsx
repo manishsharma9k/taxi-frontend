@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Search, Trash2, Reply } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
+import { API_URL } from '../api.js';
 
 const AdminContactsList = () => {
   const [contacts, setContacts] = useState([]);
@@ -14,7 +15,7 @@ const AdminContactsList = () => {
 
   const fetchContacts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/contacts');
+      const res = await axios.get(`${API_URL}/api/admin/contacts`);
       setContacts(res.data);
     } catch (error) {
       console.error('Error fetching contacts:', error);
@@ -40,7 +41,7 @@ const AdminContactsList = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:5000/api/admin/contacts/${id}`);
+          await axios.delete(`${API_URL}/api/admin/contacts/${id}`);
           toast.success('Contact inquiry deleted successfully!');
           fetchContacts();
         } catch (error) {

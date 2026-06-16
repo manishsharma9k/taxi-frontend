@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Smartphone, Lock } from 'lucide-react';
+import { API_URL } from '../api.js';
 
 const ForgotPasswordModal = ({ onClose }) => {
   const [step, setStep] = useState(1); // 1=phone, 2=otp+newpass
@@ -20,7 +21,7 @@ const ForgotPasswordModal = ({ onClose }) => {
     if (phone.length !== 10) { setErr('Enter a valid 10-digit phone number'); return; }
     setLoading(true); setErr('');
     try {
-      const res = await fetch('http://localhost:5000/api/auth/forgot-password', {
+      const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone }),
       });
@@ -39,7 +40,7 @@ const ForgotPasswordModal = ({ onClose }) => {
     if (newPassword !== confirmPassword) { setErr('Passwords do not match'); return; }
     setLoading(true); setErr('');
     try {
-      const res = await fetch('http://localhost:5000/api/auth/reset-password', {
+      const res = await fetch(`${API_URL}/api/auth/reset-password`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, otp, newPassword }),
       });

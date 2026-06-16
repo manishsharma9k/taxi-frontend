@@ -2,6 +2,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { User as UserIcon, LogOut, Sun, Moon, Menu, X } from 'lucide-react';
 import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { API_URL } from '../api.js';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -26,7 +27,7 @@ const Navbar = () => {
   useEffect(() => {
     const fetchLinks = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/admin/header-links');
+        const res = await fetch(`${API_URL}/api/admin/header-links`);
         if (!res.ok) throw new Error('Header links fetch failed');
         const data = await res.json();
         const visibleLinks = data.filter((link) => link.visible !== false);

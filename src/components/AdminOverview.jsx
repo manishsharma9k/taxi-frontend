@@ -3,6 +3,7 @@ import axios from 'axios';
 import { FaUsers, FaCar, FaEnvelope, FaRoute, FaCheckCircle, FaTimesCircle, FaClock, FaMotorcycle, FaTaxi, FaMapMarkedAlt } from 'react-icons/fa';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, AreaChart, Area } from 'recharts';
 import AdminLiveMap from './AdminLiveMap';
+import { API_URL } from '../api.js';
 
 const S = {
   wrap: {
@@ -101,7 +102,7 @@ const AdminOverview = ({ setActiveTab }) => {
       signups: Math.floor(Math.random() * 20) + 5,
       visitors: Math.floor(Math.random() * 500) + 100,
     })));
-    axios.get('http://localhost:5000/api/admin/stats')
+    axios.get(`${API_URL}/api/admin/stats`)
       .then(r => setStats(r.data))
       .catch(() => {})
       .finally(() => setLoading(false));

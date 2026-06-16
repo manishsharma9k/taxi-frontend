@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Search, Trash2, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
+import { API_URL } from '../api.js';
 
 const AdminRidesList = ({ category, statusFilter }) => {
   const [rides, setRides] = useState([]);
@@ -21,7 +22,7 @@ const AdminRidesList = ({ category, statusFilter }) => {
       if (areaFilter.trim()) params.append('area', areaFilter.trim());
       if (filterDate) params.append('startDate', filterDate);
       if (filterDate) params.append('endDate', filterDate);
-      const res = await axios.get(`http://localhost:5000/api/admin/rides?${params.toString()}`);
+      const res = await axios.get(`${API_URL}/api/admin/rides?${params.toString()}`);
       setRides(res.data);
     } catch (error) {
       console.error('Error fetching rides:', error);
@@ -45,7 +46,7 @@ const AdminRidesList = ({ category, statusFilter }) => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:5000/api/admin/rides/${id}`);
+          await axios.delete(`${API_URL}/api/admin/rides/${id}`);
           toast.success('Ride deleted successfully!');
           fetchRides();
         } catch (error) {

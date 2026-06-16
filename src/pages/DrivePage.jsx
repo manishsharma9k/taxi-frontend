@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { usePageContent } from '../hooks/usePageContent';
 import './DrivePage.css';
+import { API_URL } from '../api.js';
 
 const DrivePage = () => {
   const { user } = useContext(AuthContext);
@@ -97,7 +98,7 @@ const DrivePage = () => {
 
     if (step === 2) {
       try {
-        const res = await fetch('http://localhost:5000/api/captains/otp/send', {
+        const res = await fetch(`${API_URL}/api/captains/otp/send`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ phone: formData.phone })
@@ -117,7 +118,7 @@ const DrivePage = () => {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/captains/add', {
+      const res = await fetch(`${API_URL}/api/captains/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

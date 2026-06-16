@@ -10,6 +10,7 @@ import './CSS/RideForm.css';
 import { DETAILED_LOCATIONS } from '../data/districts';
 import { LUCKNOW_GROUPED } from '../data/lucknow';
 import { UP_DISTRICTS_GROUPED } from '../data/up_districts';
+import { API_URL } from '../api.js';
 
 // Fix leaflet default marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -310,7 +311,7 @@ const RideForm = () => {
     if (!pickup || !dropoff) { setError('Please enter both pickup and dropoff locations.'); return; }
     setError(''); setSelectedOption(null); setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/rides/estimate', {
+      const res = await fetch(`${API_URL}/api/rides/estimate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pickup, dropoff }),
@@ -324,7 +325,7 @@ const RideForm = () => {
     if (!user || !token) { setError('Please login first to book a ride.'); return; }
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/rides/book', {
+      const res = await fetch(`${API_URL}/api/rides/book`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ pickup, dropoff, fare: selectedOption.price, vehicleType: selectedOption.id, paymentMethod: 'cash', ...(pickupCoords && { pickupLat: pickupCoords[0], pickupLng: pickupCoords[1] }) }),

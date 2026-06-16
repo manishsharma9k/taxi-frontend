@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { API_URL } from '../api.js';
 
 const FILTERS = ['all', 'completed', 'cancelled'];
 
@@ -11,7 +12,7 @@ const CaptainRideHistory = () => {
 
   useEffect(() => {
     if (!token) return;
-    fetch('http://localhost:5000/api/captains/ride-history', { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_URL}/api/captains/ride-history`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(d => setRides(Array.isArray(d) ? d : []))
       .finally(() => setLoading(false));

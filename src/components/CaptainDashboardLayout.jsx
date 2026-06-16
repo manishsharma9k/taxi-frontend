@@ -16,8 +16,9 @@ import CaptainRideHistory from "./CaptainRideHistory";
 import CaptainEarnings from "./CaptainEarnings";
 import CaptainProfile from "./CaptainProfile";
 import CaptainChat from "./CaptainChat";
+import { API_URL } from '../api.js';
 
-const socket = io('http://localhost:5000', { autoConnect: false });
+const socket = io(API_URL, { autoConnect: false });
 
 const TABS = [
   { id: "overview",      label: "Overview",      icon: <FaThLarge /> },
@@ -46,7 +47,7 @@ const CaptainDashboardLayout = () => {
     socket.connect();
     socket.emit('identify', { role: 'captain', id: user.id });
     // Fetch current online status from server
-    fetch('http://localhost:5000/api/captains/me', {
+    fetch(`${API_URL}/api/captains/me`, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(r => r.json()).then(d => {
       if (d.isOnline) setIsOnline(true);
@@ -69,7 +70,7 @@ const CaptainDashboardLayout = () => {
       if (!lat || !lng) return;
 
       socket.emit('captain:location', { captainId: user.id, lat, lng });
-      await fetch('http://localhost:5000/api/captains/location', {
+      await fetch(`${API_URL}/api/captains/location`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ lat, lng, isOnline: true })
@@ -110,7 +111,7 @@ const CaptainDashboardLayout = () => {
     const next = !isOnline;
     setIsOnline(next);
     // Update online status only; do not clear existing location
-    await fetch('http://localhost:5000/api/captains/location', {
+    await fetch(`${API_URL}/api/captains/location`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ isOnline: next })

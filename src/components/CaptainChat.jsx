@@ -2,8 +2,9 @@ import React, { useEffect, useState, useRef, useContext, useCallback } from 'rea
 import { AuthContext } from '../context/AuthContext';
 import { io } from 'socket.io-client';
 import { Trash2, X, CheckCheck } from 'lucide-react';
+import { API_URL } from '../api.js';
 
-const socket = io('http://localhost:5000');
+const socket = io(API_URL);
 
 const Tick = ({ read, sender }) => {
   if (sender !== 'captain') return null;
@@ -41,7 +42,7 @@ const CaptainChat = () => {
   const fetchMessages = useCallback(async () => {
     if (!captainId) return;
     try {
-      const res  = await fetch(`http://localhost:5000/api/chat/${captainId}?role=captain`);
+      const res  = await fetch(`${API_URL}/api/chat/${captainId}?role=captain`);
       const data = await res.json();
       setMessages(Array.isArray(data) ? data : []);
     } finally { setLoading(false); }
@@ -58,7 +59,7 @@ const CaptainChat = () => {
         return [...prev, msg];
       });
       if (msg._id && msg.sender === 'admin')
-        fetch(`http://localhost:5000/api/chat/read/${msg._id}`, { method: 'PATCH' }).catch(() => {});
+        fetch(`${API_URL}/api/chat/read/${msg._id}`, { method: 'PATCH' }).catch(() => {});
     };
     const onDeleted = ({ messageId, role }) => {
       if (role === 'captain') setMessages(prev => prev.filter(m => m._id !== messageId));
@@ -89,7 +90,7 @@ const CaptainChat = () => {
     if (!input.trim() || !captainId) return;
     const text = input.trim(); setInput('');
     try {
-      await fetch('http://localhost:5000/api/chat/send', {
+      await fetch(`${API_URL}/api/chat/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ captainId, sender: 'captain', text }),
@@ -129,7 +130,7 @@ const CaptainChat = () => {
 
   const deleteSingleMessage = async (msgId) => {
     setDropdown(null);
-    await fetch(`http://localhost:5000/api/chat/message/${msgId}`, {
+    await fetch(`${API_URL}/api/chat/message/${msgId}`, {
       method: 'DELETE', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ role: 'captain' }),
     });
@@ -138,7 +139,7 @@ const CaptainChat = () => {
 
   const deleteSelectedMessages = async () => {
     for (const msgId of selectedMsgs) {
-      await fetch(`http://localhost:5000/api/chat/message/${msgId}`, {
+      await fetch(`${API_URL}/api/chat/message/${msgId}`, {
         method: 'DELETE', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: 'captain' }),
       });
@@ -149,7 +150,7 @@ const CaptainChat = () => {
 
   const deleteChat = async () => {
     if (!window.confirm('Delete entire chat with admin? This cannot be undone for your side.')) return;
-    await fetch(`http://localhost:5000/api/chat/chat/${captainId}`, {
+    await fetch(`${API_URL}/api/chat/chat/${captainId}`, {
       method: 'DELETE', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ role: 'captain' }),
     });

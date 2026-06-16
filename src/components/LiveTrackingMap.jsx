@@ -10,6 +10,7 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { AuthContext } from '../context/AuthContext';
+import { API_URL } from '../api.js';
 
 // Fix leaflet icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -37,7 +38,7 @@ const LiveTrackingMap = ({ rideDetails, onCancel }) => {
    // Fetch nearby captains
    useEffect(() => {
       const fetchNearby = () => {
-         fetch(`http://localhost:5000/api/captains/nearby?lat=${baseLat}&lng=${baseLng}&radius=15&vehicleType=${rideDetails?.id || ''}`)
+         fetch(`${API_URL}/api/captains/nearby?lat=${baseLat}&lng=${baseLng}&radius=15&vehicleType=${rideDetails?.id || ''}`)
             .then(r => r.json())
             .then(d => Array.isArray(d) && setNearbyCaptains(d))
             .catch(() => { });
@@ -53,7 +54,7 @@ const LiveTrackingMap = ({ rideDetails, onCancel }) => {
          if (!rideDetails?.rideId) return;
 
          try {
-            const res = await fetch(`http://localhost:5000/api/rides/${rideDetails.rideId}`, {
+            const res = await fetch(`${API_URL}/api/rides/${rideDetails.rideId}`, {
                headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -133,7 +134,7 @@ const LiveTrackingMap = ({ rideDetails, onCancel }) => {
 
       setIsCancelling(true);
       try {
-         const res = await fetch('http://localhost:5000/api/rides/cancel', {
+         const res = await fetch(`${API_URL}/api/rides/cancel`, {
             method: 'POST',
             headers: {
                'Content-Type': 'application/json',

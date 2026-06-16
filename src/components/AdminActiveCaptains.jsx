@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { Search, RefreshCw, Activity } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { API_URL } from '../api.js';
 
 const VEHICLE_ICONS = { bike: '🏍️', auto: '🛺', cab: '🚗' };
 
@@ -14,7 +15,7 @@ const AdminActiveCaptains = ({ defaultVehicle = 'all' }) => {
 
   const fetchActiveCaptains = useCallback(async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/online-captains', {
+      const res = await axios.get(`${API_URL}/api/admin/online-captains`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
       });
       setCaptains(res.data);
@@ -35,7 +36,7 @@ const AdminActiveCaptains = ({ defaultVehicle = 'all' }) => {
   const handleViewStats = async (captain) => {
     try {
       Swal.fire({ title: 'Loading...', didOpen: () => Swal.showLoading() });
-      const res = await axios.get(`http://localhost:5000/api/admin/captains/${captain._id}/stats`);
+      const res = await axios.get(`${API_URL}/api/admin/captains/${captain._id}/stats`);
       const s = res.data;
       Swal.fire({
         title: `📊 ${captain.name}`,

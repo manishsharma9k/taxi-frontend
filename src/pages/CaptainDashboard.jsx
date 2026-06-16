@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import './CaptainDashboard.css';
+import { API_URL } from '../api.js';
 
 const VEHICLE_ICONS = { bike: '🏍️', auto: '🛺', cab: '🚗' };
 
@@ -23,7 +24,7 @@ const CaptainDashboard = () => {
 
   const fetchPendingRides = useCallback(() => {
     if (!token) return;
-    fetch('http://localhost:5000/api/rides/pending', {
+    fetch(`${API_URL}/api/rides/pending`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(r => r.json())
@@ -33,7 +34,7 @@ const CaptainDashboard = () => {
 
   const fetchStats = useCallback(() => {
     if (!token) return;
-    fetch('http://localhost:5000/api/captains/stats', {
+    fetch(`${API_URL}/api/captains/stats`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(r => r.json())
@@ -43,7 +44,7 @@ const CaptainDashboard = () => {
 
   const fetchActiveRide = useCallback(() => {
     if (!token) return;
-    fetch('http://localhost:5000/api/rides/active', {
+    fetch(`${API_URL}/api/rides/active`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(r => r.json())
@@ -63,7 +64,7 @@ const CaptainDashboard = () => {
 
   const acceptRide = async (rideId) => {
     try {
-      const res = await fetch('http://localhost:5000/api/rides/accept', {
+      const res = await fetch(`${API_URL}/api/rides/accept`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ rideId })
@@ -78,7 +79,7 @@ const CaptainDashboard = () => {
     try {
       const payload = { rideId: activeRide._id, status };
       if (otp) payload.otp = otp;
-      const res = await fetch('http://localhost:5000/api/rides/status', {
+      const res = await fetch(`${API_URL}/api/rides/status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload)
@@ -132,7 +133,7 @@ const CaptainDashboard = () => {
     if (!reason) return;
     setCancelling(true);
     try {
-      const res = await fetch('http://localhost:5000/api/rides/captain-cancel', {
+      const res = await fetch(`${API_URL}/api/rides/captain-cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ rideId: activeRide._id, cancelReason: reason })

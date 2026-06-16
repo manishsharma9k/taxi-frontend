@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaPlus, FaTrash, FaSave } from 'react-icons/fa';
+import { API_URL } from '../api.js';
 
-const API_BASE = 'http://localhost:5000/api/admin';
+const API_BASE = `${API_URL}/api/admin`;
 
 const AdminPageContentManager = () => {
   const [items, setItems] = useState([]);

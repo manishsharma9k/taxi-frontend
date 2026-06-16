@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { FaMoneyBillWave, FaRoute, FaChartLine, FaStar } from 'react-icons/fa';
+import { API_URL } from '../api.js';
 
 const CaptainEarnings = () => {
   const [stats, setStats] = useState(null);
@@ -11,8 +12,8 @@ const CaptainEarnings = () => {
   useEffect(() => {
     if (!token) return;
     Promise.all([
-      fetch('http://localhost:5000/api/captains/stats', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-      fetch('http://localhost:5000/api/captains/ride-history', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+      fetch(`${API_URL}/api/captains/stats`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+      fetch(`${API_URL}/api/captains/ride-history`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
     ]).then(([s, h]) => {
       setStats(s);
       setRides(Array.isArray(h) ? h.filter(r => r.status === 'completed') : []);

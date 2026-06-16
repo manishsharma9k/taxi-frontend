@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Lock, Mail } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import Swal from 'sweetalert2';
+import { API_URL } from '../api.js';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
@@ -42,7 +43,7 @@ const AdminLogin = () => {
         setError('');
         
         try {
-          const res = await axios.post('http://localhost:5000/api/auth/admin-login', {
+          const res = await axios.post(`${API_URL}/api/auth/admin-login`, {
             email,
             password
           });

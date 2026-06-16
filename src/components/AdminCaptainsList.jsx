@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Search, Trash2, Activity } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
+import { API_URL } from '../api.js';
 
 const AdminCaptainsList = ({ statusFilter }) => {
   const [captains, setCaptains] = useState([]);
@@ -14,7 +15,7 @@ const AdminCaptainsList = ({ statusFilter }) => {
 
   const fetchCaptains = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/captains');
+      const res = await axios.get(`${API_URL}/api/admin/captains`);
       setCaptains(res.data);
     } catch (error) {
       console.error('Error fetching captains:', error);
@@ -29,7 +30,7 @@ const AdminCaptainsList = ({ statusFilter }) => {
 
   const handleApprove = async (id) => {
     try {
-      await axios.put(`http://localhost:5000/api/admin/captains/${id}/approve`);
+      await axios.put(`${API_URL}/api/admin/captains/${id}/approve`);
       toast.success('Captain approved successfully!');
       fetchCaptains();
     } catch (error) {
@@ -40,7 +41,7 @@ const AdminCaptainsList = ({ statusFilter }) => {
 
   const handleReject = async (id) => {
     try {
-      await axios.put(`http://localhost:5000/api/admin/captains/${id}/reject`);
+      await axios.put(`${API_URL}/api/admin/captains/${id}/reject`);
       toast.success('Captain rejected successfully!');
       fetchCaptains();
     } catch (error) {
@@ -62,7 +63,7 @@ const AdminCaptainsList = ({ statusFilter }) => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:5000/api/admin/captains/${id}`);
+          await axios.delete(`${API_URL}/api/admin/captains/${id}`);
           toast.success('Captain deleted successfully!');
           fetchCaptains();
         } catch (error) {
@@ -81,7 +82,7 @@ const AdminCaptainsList = ({ statusFilter }) => {
           Swal.showLoading();
         }
       });
-      const res = await axios.get(`http://localhost:5000/api/admin/captains/${captain._id}/stats`);
+      const res = await axios.get(`${API_URL}/api/admin/captains/${captain._id}/stats`);
       const stats = res.data;
       
       Swal.fire({

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { API_URL } from '../api.js';
 
 // Fix leaflet icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -43,10 +44,10 @@ const AdminLiveMap = () => {
   const fetchData = async () => {
     try {
       const [capRes, rideRes] = await Promise.all([
-        fetch('http://localhost:5000/api/admin/online-captains', {
+        fetch(`${API_URL}/api/admin/online-captains`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
         }),
-        fetch('http://localhost:5000/api/admin/rides?status=ongoing', {
+        fetch(`${API_URL}/api/admin/rides?status=ongoing`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
         }),
       ]);

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Search, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
+import { API_URL } from '../api.js';
 
 const AdminUsersList = () => {
   const [users, setUsers] = useState([]);
@@ -14,7 +15,7 @@ const AdminUsersList = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/users');
+      const res = await axios.get(`${API_URL}/api/admin/users`);
       setUsers(res.data);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -40,7 +41,7 @@ const AdminUsersList = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:5000/api/admin/users/${id}`);
+          await axios.delete(`${API_URL}/api/admin/users/${id}`);
           toast.success('User deleted successfully!');
           fetchUsers();
         } catch (error) {

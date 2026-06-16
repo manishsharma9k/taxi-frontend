@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { API_URL } from '../api.js';
 
 const ForgotPasswordModal = ({ onClose }) => {
   const [step, setStep] = useState(1);
@@ -19,7 +20,7 @@ const ForgotPasswordModal = ({ onClose }) => {
     e.preventDefault();
     setLoading(true); setErr('');
     try {
-      const res = await fetch('http://localhost:5000/api/captains/forgot-password', {
+      const res = await fetch(`${API_URL}/api/captains/forgot-password`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
@@ -38,7 +39,7 @@ const ForgotPasswordModal = ({ onClose }) => {
     if (newPassword !== confirmPassword) { setErr('Passwords do not match'); return; }
     setLoading(true); setErr('');
     try {
-      const res = await fetch('http://localhost:5000/api/captains/reset-password', {
+      const res = await fetch(`${API_URL}/api/captains/reset-password`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp, newPassword }),
       });
