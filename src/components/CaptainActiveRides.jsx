@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { FaCheckCircle, FaTimesCircle, FaPhone, FaMapMarkerAlt, FaArrowRight, FaBolt, FaExclamationTriangle } from 'react-icons/fa';
+import { FaCheckCircle, FaTimesCircle, FaPhone, FaMapMarkerAlt, FaArrowRight, FaBolt, FaExclamationTriangle, FaStar } from 'react-icons/fa';
+import { MessageCircle } from 'lucide-react';
 import Swal from 'sweetalert2';
+import RideChat from './RideChat';
 import { API_URL } from '../api.js';
 
 const VEHICLE_ICONS = { bike: '🏍️', auto: '🛺', cab: '🚗' };
@@ -9,9 +11,10 @@ const VEHICLE_ICONS = { bike: '🏍️', auto: '🛺', cab: '🚗' };
 const CaptainActiveRides = ({ isOnline }) => {
   const [pendingRides, setPendingRides] = useState([]);
   const [activeRide, setActiveRide] = useState(null);
+  const [showChat, setShowChat] = useState(false);
   const [view, setView] = useState('requests'); // 'requests' | 'active'
   const [cancelling, setCancelling] = useState(false);
-  const { token } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
 
   const fetchPending = useCallback(() => {
     if (!token) return;
@@ -224,70 +227,82 @@ const CaptainActiveRides = ({ isOnline }) => {
           {!activeRide ? (
             <div className="cdl-empty"><div className="ei">✅</div><div className="et">No Active Ride</div><div className="es">Accept a ride request to see it here</div></div>
           ) : (
-            <div className="cdl-active-panel">
-              <div className="cdl-active-panel-top">
-                <div className="cdl-status-pill">
-                  <span className="cdl-status-dot" />
-                  {activeRide.status === 'accepted' ? 'Heading to Pickup' : activeRide.status === 'ongoing' ? 'Ride in Progress' : activeRide.status === 'completed' ? 'Ride Completed' : activeRide.status}
+            <div className="rapido-active-container">
+              <div className="rapido-map-bg">
+                <div className="rapido-map-placeholder">
+                  <FaMapMarkerAlt size={40} color="#FFD700" style={{ opacity: 0.3 }} />
+                  <div>Live Tracking Map</div>
                 </div>
-                <span style={{ fontSize: '1.5rem' }}>{VEHICLE_ICONS[activeRide.vehicleType] || '🚗'}</span>
               </div>
 
-              <div className="cdl-active-body">
-                {/* Route */}
-                <div className="cdl-route-card">
-                  <div className="cdl-route-card-row">
-                    <div className="cdl-rc-icon pickup"><FaMapMarkerAlt size={13} /></div>
-                    <div><div className="cdl-rc-lbl">Pickup</div><div className="cdl-rc-val">{activeRide.pickup}</div></div>
+              <div className="rapido-bottom-sheet">
+                <div className="rbs-drag-handle"></div>
+                <div className="rbs-header">
+                  <div className="rbs-time-dist">
+                    <span>5 MIN</span> • <span>1.2 KM</span>
                   </div>
-                  <div className="cdl-rc-divider" />
-                  <div className="cdl-route-card-row">
-                    <div className="cdl-rc-icon dropoff"><FaArrowRight size={13} /></div>
-                    <div><div className="cdl-rc-lbl">Drop</div><div className="cdl-rc-val">{activeRide.dropoff}</div></div>
+                  <div className="rbs-status-pill">
+                    {activeRide.status === 'accepted' ? 'ARRIVING SOON' : activeRide.status === 'ongoing' ? 'ON TRIP' : activeRide.status === 'completed' ? 'COMPLETED' : activeRide.status.toUpperCase()}
                   </div>
                 </div>
 
-                {/* Passenger */}
                 {activeRide.user && (
-                  <div className="cdl-pax-card">
-                    <div className="cdl-pax-info">
-                      <div className="cdl-pax-big-av">👤</div>
-                      <div>
-                        <div className="cdl-pax-big-name">{activeRide.user.name}</div>
-                        <div className="cdl-pax-big-phone">{activeRide.user.phone}</div>
+                  <div className="rbs-passenger">
+                    <div className="rbs-pax-av">👤</div>
+                    <div className="rbs-pax-details">
+                      <div className="rbs-pax-name">
+                        {activeRide.user.name} <FaStar size={11} color="#FFD700" style={{ marginLeft: '4px' }} /> 4.9
+                      </div>
+                      <div className="rbs-pax-pay">{activeRide.paymentMethod || 'Cash'} • ₹{activeRide.fare}</div>
+                      <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
+                        <a href={`tel:${activeRide.user.phone}`} className="rbs-btn-call" style={{ textDecoration: 'none', padding: '5px 10px', background: '#222', borderRadius: '5px', fontSize: '0.75rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <FaPhone size={12} /> CALL
+                        </a>
+                        <button className="rbs-btn-call" onClick={() => setShowChat(true)} style={{ background: '#3b82f6', border: 'none', borderRadius: '5px', color: '#fff', padding: '5px 10px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+                          <MessageCircle size={12} /> CHAT
+                        </button>
                       </div>
                     </div>
-                    <a href={`tel:${activeRide.user.phone}`} className="cdl-call-btn"><FaPhone size={14} /></a>
                   </div>
                 )}
 
-                {/* Fare */}
-                <div className="cdl-fare-row">
-                  <div><div className="cdl-fare-lbl2">Fare</div><div className="cdl-fare-big">₹{activeRide.fare}</div></div>
-                  <div style={{ textAlign: 'right' }}><div className="cdl-fare-lbl2">Payment</div><div className="cdl-fare-method">{activeRide.paymentMethod || 'Cash'}</div></div>
+                <div className="rbs-route">
+                  <div className="rbs-route-point">
+                    <div className="rbs-dot-green"></div>
+                    <div className="rbs-loc-text">{activeRide.pickup}</div>
+                  </div>
+                  <div className="rbs-route-line-v"></div>
+                  <div className="rbs-route-point">
+                    <div className="rbs-dot-red"></div>
+                    <div className="rbs-loc-text">{activeRide.dropoff}</div>
+                  </div>
                 </div>
 
-                {/* OTP — captain must ask passenger, never shown here */}
                 {activeRide.status === 'accepted' && (
-                  <div className="cdl-otp-box" style={{ background: 'rgba(239,68,68,0.08)', border: '1px dashed #ef4444' }}>
-                    <div className="cdl-otp-lbl" style={{ color: '#ef4444' }}>🔐 Ask passenger for OTP to start ride</div>
+                  <div className="rbs-otp-hint">
+                    🔐 Ask passenger for OTP to start the ride
                   </div>
                 )}
 
-                {/* Actions */}
-                <div className="cdl-actions">
+                <div className="rbs-actions">
                   {activeRide.status === 'accepted' && (
-                    <button className="cdl-btn-start" onClick={handleStartRide}><FaBolt size={16} /> Start Ride</button>
+                    <button className="rbs-btn rbs-btn-start" onClick={handleStartRide}>
+                      <span className="rbs-swipe-icon">»</span> START RIDE
+                    </button>
                   )}
                   {activeRide.status === 'ongoing' && (
-                    <button className="cdl-btn-complete" onClick={() => updateStatus('completed')}><FaCheckCircle size={16} /> Complete Ride</button>
+                    <button className="rbs-btn rbs-btn-complete" onClick={() => updateStatus('completed')}>
+                      COMPLETE RIDE
+                    </button>
                   )}
                   {activeRide.status === 'completed' && (
-                    <button className="cdl-btn-done" onClick={handlePaymentDone}><FaCheckCircle size={16} /> Payment Collected — Done</button>
+                    <button className="rbs-btn rbs-btn-done" onClick={handlePaymentDone}>
+                      PAYMENT COLLECTED
+                    </button>
                   )}
                   {['accepted', 'ongoing'].includes(activeRide.status) && (
-                    <button className="cdl-btn-cancel" onClick={handleCancel} disabled={cancelling}>
-                      <FaExclamationTriangle size={14} /> {cancelling ? 'Cancelling...' : 'Cancel This Ride'}
+                    <button className="rbs-btn-cancel-text" onClick={handleCancel} disabled={cancelling}>
+                      {cancelling ? 'Cancelling...' : 'Cancel This Ride'}
                     </button>
                   )}
                 </div>
@@ -295,6 +310,16 @@ const CaptainActiveRides = ({ isOnline }) => {
             </div>
           )}
         </>
+      )}
+
+      {/* Chat Overlay */}
+      {showChat && activeRide && (
+        <RideChat
+          rideId={activeRide._id}
+          senderId={user?._id}
+          receiverId={activeRide.user?._id}
+          onClose={() => setShowChat(false)}
+        />
       )}
     </div>
   );

@@ -33,6 +33,8 @@ const CaptainDashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [isOnline, setIsOnline] = useState(false);
+  const [incomingRide, setIncomingRide] = useState(null);
+  const [incomingTimer, setIncomingTimer] = useState(0);
   const { token, user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const locationWatcher = useRef(null);
@@ -52,8 +54,48 @@ const CaptainDashboardLayout = () => {
     }).then(r => r.json()).then(d => {
       if (d.isOnline) setIsOnline(true);
     }).catch(() => {});
-    return () => { socket.disconnect(); };
+
+    socket.on('ride:new', (data) => {
+      setIncomingRide(data);
+      setIncomingTimer(15); // 15 seconds to accept
+    });
+
+    return () => { 
+      socket.off('ride:new');
+      socket.disconnect(); 
+    };
   }, [user?.id, token]);
+
+  useEffect(() => {
+    if (incomingTimer > 0) {
+      const timerId = setTimeout(() => setIncomingTimer(prev => prev - 1), 1000);
+      return () => clearTimeout(timerId);
+    } else if (incomingTimer === 0 && incomingRide) {
+      setIncomingRide(null); // auto reject/ignore
+    }
+  }, [incomingTimer, incomingRide]);
+
+  const handleAcceptRide = async () => {
+    if (!incomingRide) return;
+    try {
+      const res = await fetch(`${API_URL}/api/rides/accept`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ rideId: incomingRide.rideId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIncomingRide(null);
+        setActiveTab("active-rides");
+        // We do not show Swal.fire here to keep it seamless like Rapido
+      } else {
+        Swal.fire('Error', data.message || 'Ride already accepted by another captain', 'error');
+        setIncomingRide(null);
+      }
+    } catch {
+      Swal.fire('Error', 'Network error', 'error');
+    }
+  };
 
   useEffect(() => {
     if (!isOnline || !navigator.geolocation || !token || !user?.id) {
@@ -253,6 +295,38 @@ const CaptainDashboardLayout = () => {
 
         <div className="cdl-body">{renderContent()}</div>
       </main>
+
+      {/* ── Rapido Style Incoming Ride Popup ── */}
+      {incomingRide && (
+        <div className="rapido-incoming-overlay">
+          <div className="rapido-incoming-card">
+            <div className="ric-timer">
+              <svg width="60" height="60" viewBox="0 0 60 60">
+                <circle cx="30" cy="30" r="28" fill="none" stroke="#e5e7eb" strokeWidth="4" />
+                <circle cx="30" cy="30" r="28" fill="none" stroke="#22c55e" strokeWidth="4" 
+                        strokeDasharray="175" strokeDashoffset={175 - (175 * incomingTimer) / 15}
+                        style={{ transition: 'stroke-dashoffset 1s linear', transform: 'rotate(-90deg)', transformOrigin: '50% 50%' }} />
+              </svg>
+              <div className="ric-time">{incomingTimer}</div>
+            </div>
+            
+            <div className="ric-title">New Ride Request</div>
+            <div className="ric-fare">₹{incomingRide.fare}</div>
+            <div className="ric-dist">Estimated Fare • {incomingRide.vehicleType?.toUpperCase() || 'CAB'}</div>
+            
+            <div className="ric-route">
+              <div className="ric-route-row"><div className="rbs-dot-green"></div><div className="rbs-loc-text">{incomingRide.pickup}</div></div>
+              <div className="rbs-route-line-v" style={{margin:'4px 0 4px 4px', height:'16px'}}></div>
+              <div className="ric-route-row"><div className="rbs-dot-red"></div><div className="rbs-loc-text">{incomingRide.dropoff}</div></div>
+            </div>
+
+            <div className="ric-actions">
+              <button className="ric-btn-reject" onClick={() => setIncomingRide(null)}>DECLINE</button>
+              <button className="ric-btn-accept" onClick={handleAcceptRide}>ACCEPT RIDE</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

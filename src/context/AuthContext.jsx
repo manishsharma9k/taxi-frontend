@@ -9,18 +9,18 @@ export const AuthProvider = ({ children }) => {
   const [role, setRole] = useState(localStorage.getItem('qr_role') || 'user');
   const [authLoading, setAuthLoading] = useState(true);
 
-  // 24-hour session expiry check
+  // 30-day session expiry check
   useEffect(() => {
     const loginTime = localStorage.getItem('qr_login_time');
     if (loginTime) {
       const elapsed = Date.now() - parseInt(loginTime);
-      const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
-      if (elapsed > TWENTY_FOUR_HOURS) {
+      const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+      if (elapsed > THIRTY_DAYS) {
         logout();
         return;
       }
       // Schedule auto-logout at exact expiry
-      const remaining = TWENTY_FOUR_HOURS - elapsed;
+      const remaining = THIRTY_DAYS - elapsed;
       const timer = setTimeout(() => logout(), remaining);
       return () => clearTimeout(timer);
     }

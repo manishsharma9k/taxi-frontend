@@ -163,6 +163,7 @@ const RideForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedOption, setSelectedOption] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('Cash');
   const [activeRide, setActiveRide] = useState(null);
   const { user, token } = useContext(AuthContext);
 
@@ -328,7 +329,7 @@ const RideForm = () => {
       const res = await fetch(`${API_URL}/api/rides/book`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ pickup, dropoff, fare: selectedOption.price, vehicleType: selectedOption.id, paymentMethod: 'cash', ...(pickupCoords && { pickupLat: pickupCoords[0], pickupLng: pickupCoords[1] }) }),
+        body: JSON.stringify({ pickup, dropoff, fare: selectedOption.price, vehicleType: selectedOption.id, paymentMethod: paymentMethod, ...(pickupCoords && { pickupLat: pickupCoords[0], pickupLng: pickupCoords[1] }) }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -552,6 +553,22 @@ const RideForm = () => {
               ))}
             </div>
             {selectedOption && (
+              <div className="payment-method-selector animate-fade-in-up" style={{ margin: '1rem 0', display: 'flex', gap: '0.5rem', background: '#f8f9fa', padding: '0.5rem', borderRadius: '12px' }}>
+                 <button 
+                   type="button" 
+                   onClick={() => setPaymentMethod('Cash')}
+                   style={{ flex: 1, padding: '0.8rem', border: 'none', borderRadius: '8px', background: paymentMethod === 'Cash' ? '#22c55e' : 'transparent', color: paymentMethod === 'Cash' ? '#fff' : '#666', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}>
+                   💵 Cash
+                 </button>
+                 <button 
+                   type="button" 
+                   onClick={() => setPaymentMethod('Online')}
+                   style={{ flex: 1, padding: '0.8rem', border: 'none', borderRadius: '8px', background: paymentMethod === 'Online' ? '#3b82f6' : 'transparent', color: paymentMethod === 'Online' ? '#fff' : '#666', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}>
+                   📱 Online
+                 </button>
+              </div>
+            )}
+            {selectedOption && (
               <>
                 {!user && (
                   <div className="ride-form-error" style={{ marginBottom: '1rem' }}>
@@ -563,7 +580,7 @@ const RideForm = () => {
                   className="btn btn-primary book-btn animate-fade-in-up"
                   disabled={!user || loading}
                 >
-                  {loading ? 'Booking...' : `Book ${selectedOption.type}`}
+                  {loading ? 'Booking...' : `Book ${selectedOption.type} • ${paymentMethod}`}
                 </button>
               </>
             )}

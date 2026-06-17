@@ -1,40 +1,54 @@
 .live-map-container {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 100;
+  background: #f1f5f9;
   display: flex;
   flex-direction: column;
-  height: 80vh;
-  min-height: 600px;
-  background: var(--glass-bg);
-  border-radius: 1rem;
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--glass-border);
-  position: relative;
-  max-width: 450px;
-  width: 100%;
 }
 
 .map-wrapper {
   flex: 1;
   position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .cancel-ride-btn {
-  background: #ef4444;
-  color: white;
+  background: #fff;
+  color: #ef4444;
   border: none;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   transition: transform 0.2s;
 }
 
 .cancel-ride-btn:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
+}
+
+.recenter-btn {
+  background: #fff;
+  color: #111;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: transform 0.2s;
 }
 
 .hud-display {
@@ -42,59 +56,72 @@
   top: 1rem;
   left: 1rem;
   z-index: 1000;
-  background: rgba(255,255,255,0.9);
-  padding: 0.5rem 1rem;
+  background: #fff;
+  padding: 0.6rem 1.2rem;
   border-radius: 2rem;
   color: #111;
-  font-weight: bold;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-  font-size: 0.85rem;
+  font-weight: 800;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  font-size: 0.9rem;
 }
 
+/* ── Rapido Bottom Sheet for User Terminal ── */
 .terminal-section {
-  padding: 1.5rem;
-  background: var(--dark-card);
-  border-top: 1px solid var(--border-color);
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%;
+  height: auto;
+  max-height: 90%;
+  overflow-y: auto;
+  background: #fff;
+  color: #000;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+  padding: 1.5rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  z-index: 1001;
+  animation: slideUp 0.3s ease-out forwards;
 }
 
 .terminal-title {
   text-align: center;
-  font-weight: bold;
+  font-weight: 800;
   font-size: 1.2rem;
   margin-bottom: 1.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  color: #111;
 }
 
 .driver-info-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(0,0,0,0.2);
-  padding: 1rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--glass-border);
+  background: #f8f9fa;
+  padding: 1.2rem;
+  border-radius: 16px;
 }
 
 .driver-avatar {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: var(--glass-bg);
+  background: #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  border: 2px solid var(--primary);
+  border: 2px solid #22c55e;
   overflow: hidden;
 }
 
 .driver-name {
-  font-weight: 700;
+  font-weight: 800;
   font-size: 1.1rem;
-  color: var(--text-main);
+  color: #111;
   margin-bottom: 0.1rem;
 }
 
@@ -103,17 +130,18 @@
   align-items: center;
   gap: 0.3rem;
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: #666;
+  font-weight: 600;
 }
 
 .driver-plate {
-  background: var(--input-bg);
+  background: #fff;
   padding: 0.4rem 0.8rem;
-  border-radius: 0.5rem;
-  font-weight: bold;
+  border-radius: 8px;
+  font-weight: 800;
   letter-spacing: 1px;
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
+  border: 1px solid #ddd;
+  color: #111;
   font-size: 0.9rem;
 }
 
@@ -128,36 +156,64 @@
   padding: 0.8rem;
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 0.5rem;
   text-decoration: none;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.btn-safety {
+  background: transparent;
+  border: 2px solid #ddd;
+  color: #111;
+}
+
+.btn-chat {
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+}
+
+.btn-call {
+  background: #22c55e;
+  color: #fff;
+  border: none;
 }
 
 .cancel-action-btn {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   width: 100%;
-  padding: 0.8rem;
+  padding: 1rem;
   background: transparent;
-  border: 1px solid #ef4444;
+  border: 2px solid #ef4444;
   color: #ef4444;
-  border-radius: 0.5rem;
-  font-weight: bold;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .complete-action-btn {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   width: 100%;
-  padding: 0.8rem;
-  background: #10b981;
+  padding: 1rem;
+  background: #22c55e;
   color: #fff;
   border: none;
-  border-radius: 0.5rem;
-  font-weight: bold;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .pay-action-btn {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   width: 100%;
-  padding: 0.8rem;
-  border-radius: 0.5rem;
-  font-weight: bold;
+  padding: 1rem;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  background: #22c55e;
+  color: #fff;
+  border: none;
 }

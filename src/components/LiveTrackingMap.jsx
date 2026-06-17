@@ -2,9 +2,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { Phone, ShieldCheck, Star, X, Loader2 } from 'lucide-react';
+import { Phone, ShieldCheck, Star, X, Loader2, MessageCircle, MapPin } from 'lucide-react';
 import Swal from 'sweetalert2';
 import PaymentGateway from './PaymentGateway';
+import RideChat from './RideChat';
 import './CSS/LiveTrackingMap.css';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -34,6 +35,8 @@ const LiveTrackingMap = ({ rideDetails, onCancel }) => {
    const [captain, setCaptain] = useState(rideDetails?.captain || null);
    const [rideOtp, setRideOtp] = useState(rideDetails?.otp || null);
    const [nearbyCaptains, setNearbyCaptains] = useState([]);
+   const [showChat, setShowChat] = useState(false);
+   const [mapRef, setMapRef] = useState(null);
 
    // Fetch nearby captains
    useEffect(() => {
@@ -162,7 +165,7 @@ const LiveTrackingMap = ({ rideDetails, onCancel }) => {
 
          {/* Interactive Live Map Section */}
          <div className="map-wrapper">
-            <MapContainer center={[baseLat, baseLng]} zoom={12} style={{ height: '100%', width: '100%' }} zoomControl={false}>
+            <MapContainer center={[baseLat, baseLng]} zoom={14} style={{ height: '100%', width: '100%' }} zoomControl={false} ref={setMapRef}>
                <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
@@ -194,9 +197,12 @@ const LiveTrackingMap = ({ rideDetails, onCancel }) => {
                <Circle center={[baseLat, baseLng]} radius={10000} pathOptions={{ color: '#FFD700', fillColor: '#FFD700', fillOpacity: 0.04, weight: 1, dashArray: '6' }} />
             </MapContainer>
 
-            <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 1000 }}>
+            <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 1000, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                <button onClick={handleCancelRide} title="Cancel Ride" className="cancel-ride-btn">
                   {isCancelling ? <Loader2 size={20} style={{ animation: 'spin 2s linear infinite' }} /> : <X size={20} />}
+               </button>
+               <button onClick={() => mapRef?.setView(driverPos, 16)} title="Recenter on Driver" className="recenter-btn">
+                  <MapPin size={20} />
                </button>
             </div>
 
@@ -242,11 +248,14 @@ const LiveTrackingMap = ({ rideDetails, onCancel }) => {
             )}
 
             <div className="terminal-actions">
-               <button className="btn btn-outline action-btn" style={{ border: '1px solid var(--border-color)' }}>
+               <button className="action-btn btn-safety">
                   <ShieldCheck size={18} /> Safety
                </button>
-               <a href={`tel:${captain?.phone || ''}`} className="btn btn-primary action-btn" style={{ pointerEvents: !captain ? 'none' : 'auto', opacity: !captain ? 0.5 : 1 }}>
-                  <Phone size={18} /> Call Captain
+               <button className="action-btn btn-chat" onClick={() => setShowChat(true)} style={{ pointerEvents: !captain ? 'none' : 'auto', opacity: !captain ? 0.5 : 1 }}>
+                  <MessageCircle size={18} /> Chat
+               </button>
+               <a href={`tel:${captain?.phone || ''}`} className="action-btn btn-call" style={{ pointerEvents: !captain ? 'none' : 'auto', opacity: !captain ? 0.5 : 1 }}>
+                  <Phone size={18} /> Call
                </a>
             </div>
 
@@ -279,6 +288,16 @@ const LiveTrackingMap = ({ rideDetails, onCancel }) => {
                />
             )}
          </div>
+
+         {/* Chat Overlay */}
+         {showChat && (
+            <RideChat
+               rideId={rideDetails?.rideId}
+               senderId={rideDetails?.userId || 'user'}
+               receiverId={captain?.id || 'captain'}
+               onClose={() => setShowChat(false)}
+            />
+         )}
 
       </div>
    );
