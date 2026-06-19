@@ -1,62 +1,111 @@
-import { useState, useRef, useEffect, useContext, useCallback } from 'react';
-import { MapPin, Navigation, Clock, Map, Loader2, LocateFixed, X, Check } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import LiveTrackingMap from './LiveTrackingMap';
-import { AuthContext } from '../context/AuthContext';
-import Swal from 'sweetalert2';
-import './CSS/RideForm.css';
-import { DETAILED_LOCATIONS } from '../data/districts';
-import { LUCKNOW_GROUPED } from '../data/lucknow';
-import { UP_DISTRICTS_GROUPED } from '../data/up_districts';
-import { API_URL } from '../api.js';
+import { useState, useRef, useEffect, useContext, useCallback } from "react";
+import {
+  MapPin,
+  Navigation,
+  Clock,
+  Map,
+  Loader2,
+  LocateFixed,
+  X,
+  Check,
+} from "lucide-react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMapEvents,
+  useMap,
+} from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import LiveTrackingMap from "./LiveTrackingMap";
+import { AuthContext } from "../context/AuthContext";
+import Swal from "sweetalert2";
+import "./CSS/RideForm.css";
+import { DETAILED_LOCATIONS } from "../data/districts";
+import { LUCKNOW_GROUPED } from "../data/lucknow";
+import { UP_DISTRICTS_GROUPED } from "../data/up_districts";
+import { API_URL } from "../api.js";
+import { useNavigate } from "react-router-dom";
 
 // Fix leaflet default marker icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
 const greenIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
 const redIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
 // Component to handle map click and move marker
 const DraggableMarker = ({ position, setPosition, icon }) => {
   useMapEvents({
-    click(e) { setPosition([e.latlng.lat, e.latlng.lng]); },
+    click(e) {
+      setPosition([e.latlng.lat, e.latlng.lng]);
+    },
   });
-  return position ? <Marker position={position} icon={icon} draggable eventHandlers={{ dragend: (e) => setPosition([e.target.getLatLng().lat, e.target.getLatLng().lng]) }} /> : null;
+  return position ? (
+    <Marker
+      position={position}
+      icon={icon}
+      draggable
+      eventHandlers={{
+        dragend: (e) =>
+          setPosition([e.target.getLatLng().lat, e.target.getLatLng().lng]),
+      }}
+    />
+  ) : null;
 };
 
 // Auto-pan map to position
 const MapPanner = ({ position }) => {
   const map = useMap();
-  useEffect(() => { if (position) map.setView(position, map.getZoom()); }, [position, map]);
+  useEffect(() => {
+    if (position) map.setView(position, map.getZoom());
+  }, [position, map]);
   return null;
 };
 
 // Map Picker Modal
-const MapPickerModal = ({ title, icon: Icon, iconColor, markerIcon, initialPosition, onConfirm, onClose }) => {
-  const [markerPos, setMarkerPos] = useState(initialPosition || [26.8467, 80.9462]);
-  const [address, setAddress] = useState('');
+const MapPickerModal = ({
+  title,
+  markerIcon,
+  initialPosition,
+  onConfirm,
+  onClose,
+}) => {
+  const [markerPos, setMarkerPos] = useState(
+    initialPosition || [26.8467, 80.9462],
+  );
+  const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
 
   const reverseGeocode = useCallback(async (lat, lng) => {
     setLoading(true);
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=18&addressdetails=1`);
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=18&addressdetails=1`,
+      );
       const data = await res.json();
       const a = data.address || {};
       const parts = [
@@ -66,10 +115,16 @@ const MapPickerModal = ({ title, icon: Icon, iconColor, markerIcon, initialPosit
         a.suburb || a.village || a.town,
         a.city || a.county,
       ].filter(Boolean);
-      setAddress(parts.slice(0, 3).join(', ') || data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+      setAddress(
+        parts.slice(0, 3).join(", ") ||
+          data.display_name ||
+          `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+      );
     } catch {
       setAddress(`${lat.toFixed(5)}, ${lng.toFixed(5)}`);
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   // On open: if no initialPosition provided, try to get GPS
@@ -85,33 +140,50 @@ const MapPickerModal = ({ title, icon: Icon, iconColor, markerIcon, initialPosit
         setMarkerPos([lat, lon]);
         reverseGeocode(lat, lon);
       },
-      () => { reverseGeocode(26.8467, 80.9462); },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+      () => {
+        reverseGeocode(26.8467, 80.9462);
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 },
     );
   }, [reverseGeocode]);
 
-  useEffect(() => { reverseGeocode(markerPos[0], markerPos[1]); }, [markerPos, reverseGeocode]);
+  useEffect(() => {
+    reverseGeocode(markerPos[0], markerPos[1]);
+  }, [markerPos, reverseGeocode]);
 
   return (
     <div className="map-modal-overlay" onClick={onClose}>
-      <div className="map-modal" onClick={e => e.stopPropagation()}>
+      <div className="map-modal" onClick={(e) => e.stopPropagation()}>
         <div className="map-modal-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <Icon size={18} color={iconColor} />
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+            <MapPin size={18} color="#64748b" />
             <span className="map-modal-title">{title}</span>
           </div>
-          <button className="map-modal-close" onClick={onClose}><X size={18} /></button>
+          <button className="map-modal-close" onClick={onClose}>
+            <X size={18} />
+          </button>
         </div>
 
-        <div className="map-modal-hint">📍 Tap on map or drag the pin to set location</div>
+        <div className="map-modal-hint">
+          📍 Tap on map or drag the pin to set location
+        </div>
 
         <div className="map-modal-map">
-          <MapContainer center={markerPos} zoom={14} style={{ height: '100%', width: '100%' }} zoomControl={true}>
+          <MapContainer
+            center={markerPos}
+            zoom={14}
+            style={{ height: "100%", width: "100%" }}
+            zoomControl={true}
+          >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             />
-            <DraggableMarker position={markerPos} setPosition={setMarkerPos} icon={markerIcon} />
+            <DraggableMarker
+              position={markerPos}
+              setPosition={setMarkerPos}
+              icon={markerIcon}
+            />
             <MapPanner position={markerPos} />
           </MapContainer>
         </div>
@@ -119,8 +191,20 @@ const MapPickerModal = ({ title, icon: Icon, iconColor, markerIcon, initialPosit
         <div className="map-modal-footer">
           <div className="map-modal-address">
             {loading ? (
-              <span style={{ color: '#888', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Fetching address...
+              <span
+                style={{
+                  color: "#888",
+                  fontSize: "0.82rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.4rem",
+                }}
+              >
+                <Loader2
+                  size={14}
+                  style={{ animation: "spin 1s linear infinite" }}
+                />{" "}
+                Fetching address...
               </span>
             ) : (
               <span>{address}</span>
@@ -128,7 +212,9 @@ const MapPickerModal = ({ title, icon: Icon, iconColor, markerIcon, initialPosit
           </div>
           <button
             className="map-modal-confirm"
-            onClick={() => { if (address && !loading) onConfirm(address, markerPos); }}
+            onClick={() => {
+              if (address && !loading) onConfirm(address, markerPos);
+            }}
             disabled={loading || !address}
           >
             <Check size={16} /> Confirm Location
@@ -141,14 +227,14 @@ const MapPickerModal = ({ title, icon: Icon, iconColor, markerIcon, initialPosit
 
 // ── Main RideForm ──
 const RideForm = () => {
-  const [pickup, setPickup] = useState('');
-  const [dropoff, setDropoff] = useState('');
+  const [pickup, setPickup] = useState("");
+  const [dropoff, setDropoff] = useState("");
   const [pickupCoords, setPickupCoords] = useState(null);
 
   const [isPickupOpen, setIsPickupOpen] = useState(false);
   const [isDropoffOpen, setIsDropoffOpen] = useState(false);
-  const [selectedCity, setSelectedCity] = useState('Lucknow'); // For city tabs
-  const [selectedArea, setSelectedArea] = useState('All'); // For area chips
+  const [selectedCity, setSelectedCity] = useState("Lucknow"); // For city tabs
+  const [selectedArea, setSelectedArea] = useState("All"); // For area chips
 
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
   const [dropoffSuggestions, setDropoffSuggestions] = useState([]);
@@ -161,24 +247,54 @@ const RideForm = () => {
 
   const [estimate, setEstimate] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [selectedOption, setSelectedOption] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('Cash');
   const [activeRide, setActiveRide] = useState(null);
-  const { user, token } = useContext(AuthContext);
+  const { token, authLoading, logout, user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const sanitizeToken = (value) => {
+    if (!value) return null;
+    let cleaned = String(value).trim();
+    if (!cleaned || cleaned === "undefined" || cleaned === "null") return null;
+
+    // handle accidental values like 'Bearer xxx' or '"xxx"'
+    if (cleaned.toLowerCase().startsWith("bearer ")) {
+      cleaned = cleaned.slice(7).trim();
+    }
+    if (
+      (cleaned.startsWith('"') && cleaned.endsWith('"')) ||
+      (cleaned.startsWith("'") && cleaned.endsWith("'"))
+    ) {
+      cleaned = cleaned.slice(1, -1).trim();
+    }
+
+    if (!cleaned || cleaned === "undefined" || cleaned === "null") return null;
+    return cleaned;
+  };
+
+  // Use only primary auth token sources to avoid stale legacy tokens
+  const getRuntimeToken = () =>
+    sanitizeToken(token) || sanitizeToken(localStorage.getItem("qr_token"));
+
+  const sessionToken = getRuntimeToken();
 
   const pickupRef = useRef(null);
   const dropoffRef = useRef(null);
   const pickupTimeout = useRef(null);
   const dropoffTimeout = useRef(null);
+  const autoRetryTriedRef = useRef(false);
+  const bookingInFlightRef = useRef(false);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (pickupRef.current && !pickupRef.current.contains(e.target)) setIsPickupOpen(false);
-      if (dropoffRef.current && !dropoffRef.current.contains(e.target)) setIsDropoffOpen(false);
+      if (pickupRef.current && !pickupRef.current.contains(e.target))
+        setIsPickupOpen(false);
+      if (dropoffRef.current && !dropoffRef.current.contains(e.target))
+        setIsDropoffOpen(false);
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Store raw nominatim results so we can extract coords on selection
@@ -190,34 +306,73 @@ const RideForm = () => {
 
   // City tabs config
   const CITY_TABS = [
-    { id: 'Lucknow', label: '🏙️ Lucknow', data: LUCKNOW_GROUPED },
-    { id: 'Kanpur Nagar', label: '🏭 Kanpur', data: { 'Kanpur': UP_DISTRICTS_GROUPED['Kanpur Nagar'] || [] } },
-    { id: 'Agra', label: '🕌 Agra', data: { 'Agra': UP_DISTRICTS_GROUPED['Agra'] || [] } },
-    { id: 'Varanasi', label: '🛕 Varanasi', data: { 'Varanasi': UP_DISTRICTS_GROUPED['Varanasi'] || [] } },
-    { id: 'Prayagraj', label: '🌊 Prayagraj', data: { 'Prayagraj': UP_DISTRICTS_GROUPED['Prayagraj'] || [] } },
-    { id: 'Gorakhpur', label: '🚂 Gorakhpur', data: { 'Gorakhpur': UP_DISTRICTS_GROUPED['Gorakhpur'] || [] } },
-    { id: 'Ayodhya', label: '🪔 Ayodhya', data: { 'Ayodhya': UP_DISTRICTS_GROUPED['Ayodhya'] || [] } },
-    { id: 'Meerut', label: '🏙️ Meerut', data: { 'Meerut': UP_DISTRICTS_GROUPED['Meerut'] || [] } },
-    { id: 'Noida', label: '🏢 Noida', data: { 'Noida': UP_DISTRICTS_GROUPED['Gautam Buddha Nagar (Noida)'] || [] } },
-    { id: 'Ghaziabad', label: '🏙️ Ghaziabad', data: { 'Ghaziabad': UP_DISTRICTS_GROUPED['Ghaziabad'] || [] } },
+    { id: "Lucknow", label: "🏙️ Lucknow", data: LUCKNOW_GROUPED },
+    {
+      id: "Kanpur Nagar",
+      label: "🏭 Kanpur",
+      data: { Kanpur: UP_DISTRICTS_GROUPED["Kanpur Nagar"] || [] },
+    },
+    {
+      id: "Agra",
+      label: "🕌 Agra",
+      data: { Agra: UP_DISTRICTS_GROUPED["Agra"] || [] },
+    },
+    {
+      id: "Varanasi",
+      label: "🛕 Varanasi",
+      data: { Varanasi: UP_DISTRICTS_GROUPED["Varanasi"] || [] },
+    },
+    {
+      id: "Prayagraj",
+      label: "🌊 Prayagraj",
+      data: { Prayagraj: UP_DISTRICTS_GROUPED["Prayagraj"] || [] },
+    },
+    {
+      id: "Gorakhpur",
+      label: "🚂 Gorakhpur",
+      data: { Gorakhpur: UP_DISTRICTS_GROUPED["Gorakhpur"] || [] },
+    },
+    {
+      id: "Ayodhya",
+      label: "🪔 Ayodhya",
+      data: { Ayodhya: UP_DISTRICTS_GROUPED["Ayodhya"] || [] },
+    },
+    {
+      id: "Meerut",
+      label: "🏙️ Meerut",
+      data: { Meerut: UP_DISTRICTS_GROUPED["Meerut"] || [] },
+    },
+    {
+      id: "Noida",
+      label: "🏢 Noida",
+      data: {
+        Noida: UP_DISTRICTS_GROUPED["Gautam Buddha Nagar (Noida)"] || [],
+      },
+    },
+    {
+      id: "Ghaziabad",
+      label: "🏙️ Ghaziabad",
+      data: { Ghaziabad: UP_DISTRICTS_GROUPED["Ghaziabad"] || [] },
+    },
   ];
 
-  const activeCityData = CITY_TABS.find(c => c.id === selectedCity)?.data || LUCKNOW_GROUPED;
-  const areaKeys = ['All', ...Object.keys(activeCityData)];
+  const activeCityData =
+    CITY_TABS.find((c) => c.id === selectedCity)?.data || LUCKNOW_GROUPED;
+  const areaKeys = ["All", ...Object.keys(activeCityData)];
 
   // Get places for current city + area filter
   const getAreaPlaces = () => {
-    if (selectedArea === 'All') return activeCityData;
+    if (selectedArea === "All") return activeCityData;
     return { [selectedArea]: activeCityData[selectedArea] || [] };
   };
 
   // Filter grouped areas by query (for live search override)
   const getGroupedDropoff = (query) => {
-    const q = (query || '').toLowerCase().trim();
+    const q = (query || "").toLowerCase().trim();
     if (!q) return null; // null = show city/area UI
     const filtered = {};
     Object.entries(ALL_GROUPED).forEach(([area, places]) => {
-      const matched = places.filter(p => p.toLowerCase().includes(q));
+      const matched = places.filter((p) => p.toLowerCase().includes(q));
       const areaMatch = area.toLowerCase().includes(q);
       if (matched.length > 0) filtered[area] = matched;
       else if (areaMatch) filtered[area] = places.slice(0, 5);
@@ -226,21 +381,33 @@ const RideForm = () => {
   };
 
   // UP bounding box: viewbox=lon_min,lat_min,lon_max,lat_max
-  const UP_VIEWBOX = '77.0,23.8,84.7,30.5';
+  const UP_VIEWBOX = "77.0,23.8,84.7,30.5";
 
-  const fetchLocations = async (query, setSuggestions, setSearching, resultsRef) => {
-    if (!query || query.length < 2) { setSuggestions([]); return; }
+  const fetchLocations = async (
+    query,
+    setSuggestions,
+    setSearching,
+    resultsRef,
+  ) => {
+    if (!query || query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
     setSearching(true);
     try {
       // First try UP-bounded search for relevant local results
       const upRes = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=in&viewbox=${UP_VIEWBOX}&bounded=0&limit=8&addressdetails=1`,
-        { headers: { 'Accept-Language': 'en' } }
+        { headers: { "Accept-Language": "en" } },
       );
       const data = await upRes.json();
       resultsRef.current = data;
-      setSuggestions(data.map(item => item.display_name));
-    } catch { } finally { setSearching(false); }
+      setSuggestions(data.map((item) => item.display_name));
+    } catch {
+      setSuggestions([]);
+    } finally {
+      setSearching(false);
+    }
   };
 
   const handlePickupChange = (e) => {
@@ -248,7 +415,16 @@ const RideForm = () => {
     setPickup(val);
     setIsPickupOpen(true);
     clearTimeout(pickupTimeout.current);
-    pickupTimeout.current = setTimeout(() => fetchLocations(val, setPickupSuggestions, setIsSearchingPickup, pickupResultsRef), 300);
+    pickupTimeout.current = setTimeout(
+      () =>
+        fetchLocations(
+          val,
+          setPickupSuggestions,
+          setIsSearchingPickup,
+          pickupResultsRef,
+        ),
+      300,
+    );
   };
 
   const handleDropoffChange = (e) => {
@@ -256,7 +432,16 @@ const RideForm = () => {
     setDropoff(val);
     setIsDropoffOpen(true);
     clearTimeout(dropoffTimeout.current);
-    dropoffTimeout.current = setTimeout(() => fetchLocations(val, setDropoffSuggestions, setIsSearchingDropoff, dropoffResultsRef), 300);
+    dropoffTimeout.current = setTimeout(
+      () =>
+        fetchLocations(
+          val,
+          setDropoffSuggestions,
+          setIsSearchingDropoff,
+          dropoffResultsRef,
+        ),
+      300,
+    );
   };
 
   const buildShortAddress = (a) => {
@@ -268,91 +453,310 @@ const RideForm = () => {
       a.suburb || a.village || a.town,
       a.city || a.county,
     ].filter(Boolean);
-    return parts.slice(0, 3).join(', ');
+    return parts.slice(0, 3).join(", ");
   };
 
   const getUserLocation = () => {
-    if (!navigator.geolocation) return alert('Geolocation not supported.');
+    if (!navigator.geolocation) return alert("Geolocation not supported.");
     setIsSearchingPickup(true);
-    setPickup('Detecting your location...');
+    setPickup("Detecting your location...");
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
           const { latitude: lat, longitude: lon } = pos.coords;
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=18&addressdetails=1`,
-            { headers: { 'Accept-Language': 'en' } }
+            { headers: { "Accept-Language": "en" } },
           );
           const data = await res.json();
-          const address = buildShortAddress(data.address) || data.display_name || `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+          const address =
+            buildShortAddress(data.address) ||
+            data.display_name ||
+            `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
           setPickup(address);
           setPickupCoords([lat, lon]);
           setIsPickupOpen(false);
         } catch {
-          setPickup('');
+          setPickup("");
         } finally {
           setIsSearchingPickup(false);
         }
       },
       (err) => {
         setIsSearchingPickup(false);
-        setPickup('');
-        if (err.code === 1) alert('Location permission denied. Please allow location access in your browser.');
-        else if (err.code === 2) alert('Location unavailable. Please pick manually.');
-        else alert('Location request timed out. Please pick manually.');
+        setPickup("");
+        if (err.code === 1)
+          alert(
+            "Location permission denied. Please allow location access in your browser.",
+          );
+        else if (err.code === 2)
+          alert("Location unavailable. Please pick manually.");
+        else alert("Location request timed out. Please pick manually.");
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   };
 
-  useEffect(() => { getUserLocation(); }, []);
+  useEffect(() => {
+    getUserLocation();
+  }, []);
 
   const handleEstimate = async (e) => {
     e.preventDefault();
-    if (!pickup || !dropoff) { setError('Please enter both pickup and dropoff locations.'); return; }
-    setError(''); setSelectedOption(null); setLoading(true);
+    if (!pickup || !dropoff) {
+      setError("Please enter both pickup and dropoff locations.");
+      return;
+    }
+    setError("");
+    setSelectedOption(null);
+    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/api/rides/estimate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pickup, dropoff }),
       });
       setEstimate(await res.json());
-    } catch { } finally { setLoading(false); }
+    } catch {
+      setError("Could not fetch ride estimates. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleConfirmRide = async () => {
-    if (!selectedOption) { setError('Please select a ride option first.'); return; }
-    if (!user || !token) { setError('Please login first to book a ride.'); return; }
+  const bookRideWithPayload = async (
+    payload,
+    { silent = false, authToken = sessionToken, retryCount = 0 } = {},
+  ) => {
+    if (!authToken) {
+      setError("Please login to book a ride.");
+      return false;
+    }
+
     setLoading(true);
+    bookingInFlightRef.current = true;
     try {
       const res = await fetch(`${API_URL}/api/rides/book`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ pickup, dropoff, fare: selectedOption.price, vehicleType: selectedOption.id, paymentMethod: paymentMethod, ...(pickupCoords && { pickupLat: pickupCoords[0], pickupLng: pickupCoords[1] }) }),
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          pickup: payload.pickup,
+          dropoff: payload.dropoff,
+          fare: payload.selectedOption.price,
+          vehicleType: payload.selectedOption.id,
+          paymentMethod: "cash",
+          ...(payload.pickupCoords && {
+            pickupLat: payload.pickupCoords[0],
+            pickupLng: payload.pickupCoords[1],
+          }),
+        }),
       });
       const data = await res.json();
       if (res.ok) {
-        Swal.fire({ title: 'Ride Confirmed!', text: 'Have a good day! 🚗✨', icon: 'success', confirmButtonColor: 'var(--primary)', timer: 3000, timerProgressBar: true });
-        setActiveRide({ ...selectedOption, pickupLocation: pickup, dropoffLocation: dropoff, rideId: data.ride._id, status: data.ride.status, captain: data.ride.captain });
-      } else { setError(data.message || 'Failed to book ride'); }
-    } catch { setError('Network error.'); } finally { setLoading(false); }
+        if (!silent) {
+          Swal.fire({
+            title: "Ride Confirmed!",
+            text: "Have a good day! 🚗✨",
+            icon: "success",
+            confirmButtonColor: "var(--primary)",
+            timer: 3000,
+            timerProgressBar: true,
+          });
+        }
+        setActiveRide({
+          ...payload.selectedOption,
+          pickupLocation: payload.pickup,
+          dropoffLocation: payload.dropoff,
+          pickupCoords: payload.pickupCoords,
+          paymentMethod: data?.ride?.paymentMethod || "cash",
+          rideId: data.ride._id,
+          status: data.ride.status,
+          captain: data.ride.captain,
+        });
+        sessionStorage.removeItem("pendingRideBooking");
+        setError("");
+        return true;
+      }
+
+      if (res.status === 401) {
+        // Try one refresh attempt before logging out
+        const storedRefresh = localStorage.getItem('qr_refresh');
+        if (storedRefresh && retryCount < 1) {
+          try {
+            const r = await fetch(`${API_URL}/api/auth/refresh`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ refreshToken: storedRefresh }),
+            });
+            if (r.ok) {
+              const d = await r.json();
+              localStorage.setItem('qr_token', d.token);
+              if (d.refreshToken) localStorage.setItem('qr_refresh', d.refreshToken);
+              // retry booking with new token
+              return await bookRideWithPayload(payload, { silent, authToken: d.token, retryCount: retryCount + 1 });
+            }
+          } catch {}
+        }
+
+        logout();
+        Swal.fire({
+          title: "Session Expired",
+          text: "Please login again to book your ride.",
+          icon: "warning",
+          confirmButtonText: "Login",
+          confirmButtonColor: "var(--primary)"
+        }).then(() => {
+          navigate("/login", {
+            state: {
+              from: "/",
+              resumeRide: true,
+              message: "Please login to book a ride.",
+            },
+          });
+        });
+        return false;
+      }
+
+      if (res.status === 409 && retryCount < 1) {
+        return await bookRideWithPayload(payload, {
+          silent,
+          authToken,
+          retryCount: retryCount + 1,
+        });
+      }
+
+      setError(data.message || "Failed to book ride");
+      return false;
+    } catch {
+      setError("Network error. Please try again.");
+      return false;
+    } finally {
+      bookingInFlightRef.current = false;
+      setLoading(false);
+    }
   };
 
-  const handleCancelRide = () => { setActiveRide(null); setEstimate(null); setPickup(''); setDropoff(''); setSelectedOption(null); };
+  const handleConfirmRide = async () => {
+    if (!selectedOption) {
+      setError("Please select a ride option first.");
+      return;
+    }
+    if (!pickup || !dropoff) {
+      setError("Please enter pickup and dropoff locations.");
+      return;
+    }
 
-  if (activeRide) return <LiveTrackingMap rideDetails={activeRide} onCancel={handleCancelRide} />;
+    if (user?.role === "captain") {
+      setError(
+        "Captain account se ride book nahi hoti. User account se login karein.",
+      );
+      return;
+    }
+
+    const bookingPayload = { pickup, dropoff, selectedOption, pickupCoords };
+
+    // Save booking intent for post-login auto continuation
+    sessionStorage.setItem(
+      "pendingRideBooking",
+      JSON.stringify(bookingPayload),
+    );
+
+    // Resolve token at click-time to avoid stale state redirects
+    const runtimeToken = getRuntimeToken();
+
+    if (!runtimeToken) {
+      Swal.fire({
+        title: "Login Required",
+        text: "Please login to book your ride.",
+        icon: "info",
+        confirmButtonText: "Login",
+        confirmButtonColor: "var(--primary)"
+      }).then(() => {
+        navigate("/login", {
+          state: {
+            from: "/",
+            resumeRide: true,
+            message: "Please login to book a ride.",
+          },
+        });
+      });
+      return;
+    }
+
+    await bookRideWithPayload(bookingPayload, { authToken: runtimeToken });
+  };
+
+  const handleCancelRide = () => {
+    setActiveRide(null);
+    setEstimate(null);
+    setPickup("");
+    setDropoff("");
+    setSelectedOption(null);
+  };
+
+  useEffect(() => {
+    if (autoRetryTriedRef.current || authLoading || bookingInFlightRef.current)
+      return;
+
+    const raw = sessionStorage.getItem("pendingRideBooking");
+    if (!raw) return;
+
+    const runtimeToken = getRuntimeToken();
+    if (!runtimeToken) return;
+
+    if (user?.role === "captain") {
+      sessionStorage.removeItem("pendingRideBooking");
+      return;
+    }
+
+    const runAutoRetry = async () => {
+      try {
+        const pending = JSON.parse(raw);
+        if (
+          !pending?.pickup ||
+          !pending?.dropoff ||
+          !pending?.selectedOption?.id
+        ) {
+          sessionStorage.removeItem("pendingRideBooking");
+          return;
+        }
+
+        autoRetryTriedRef.current = true;
+        setPickup(pending.pickup);
+        setDropoff(pending.dropoff);
+        setPickupCoords(pending.pickupCoords || null);
+        setSelectedOption(pending.selectedOption);
+        await bookRideWithPayload(pending, {
+          silent: false,
+          authToken: runtimeToken,
+        });
+      } catch {
+        sessionStorage.removeItem("pendingRideBooking");
+      }
+    };
+
+    runAutoRetry();
+  }, [authLoading, sessionToken, user?.role]);
+
+  if (activeRide)
+    return (
+      <LiveTrackingMap rideDetails={activeRide} onCancel={handleCancelRide} />
+    );
 
   return (
     <>
       <div className="ride-form-container">
         <h3 className="ride-form-title">Where to?</h3>
-        <p className="ride-form-subtitle">Enter your pickup and drop location</p>
+        <p className="ride-form-subtitle">
+          Enter your pickup and drop location
+        </p>
 
         {error && <div className="ride-form-error">{error}</div>}
 
         <form onSubmit={handleEstimate} className="ride-form">
-
           {/* ── PICKUP ── */}
           <div ref={pickupRef} className="input-container">
             <MapPin size={18} className="input-icon" />
@@ -365,64 +769,139 @@ const RideForm = () => {
               onFocus={() => setIsPickupOpen(true)}
             />
             <div className="input-right-btns">
-              <button type="button" className="map-pin-btn" title="Pick on Map" onClick={() => { setIsPickupOpen(false); setShowPickupMap(true); }}>
+              <button
+                type="button"
+                className="map-pin-btn"
+                title="Pick on Map"
+                onClick={() => {
+                  setIsPickupOpen(false);
+                  setShowPickupMap(true);
+                }}
+              >
                 <Map size={16} />
               </button>
-              <button type="button" className="locate-me-btn" title="Use My Location" onClick={getUserLocation}>
+              <button
+                type="button"
+                className="locate-me-btn"
+                title="Use My Location"
+                onClick={getUserLocation}
+              >
                 <LocateFixed size={16} />
               </button>
             </div>
 
             {isPickupOpen && (
-              <div className="suggestions-dropdown animate-fade-in-up" style={{ maxHeight: '320px', overflowY: 'auto' }}>
+              <div
+                className="suggestions-dropdown animate-fade-in-up"
+                style={{ maxHeight: "320px", overflowY: "auto" }}
+              >
                 <div className="use-current-location" onClick={getUserLocation}>
                   <Navigation size={14} /> Use Current Location
                 </div>
-                <div className="use-current-location" style={{ color: '#3B82F6', borderColor: 'rgba(59,130,246,0.15)' }} onClick={() => { setIsPickupOpen(false); setShowPickupMap(true); }}>
+                <div
+                  className="use-current-location"
+                  style={{
+                    color: "#3B82F6",
+                    borderColor: "rgba(59,130,246,0.15)",
+                  }}
+                  onClick={() => {
+                    setIsPickupOpen(false);
+                    setShowPickupMap(true);
+                  }}
+                >
                   <Map size={14} /> Pick on Map
                 </div>
                 {isSearchingPickup && (
-                  <div className="loading-text"><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Searching...</div>
+                  <div className="loading-text">
+                    <Loader2
+                      size={14}
+                      style={{ animation: "spin 1s linear infinite" }}
+                    />{" "}
+                    Searching...
+                  </div>
                 )}
                 {/* Nominatim live results */}
-                {!isSearchingPickup && pickupSuggestions.length > 0 && pickupSuggestions.map((loc, i) => (
-                  <div key={i} className="suggestion-item" onClick={() => {
-                    setPickup(loc);
-                    setIsPickupOpen(false);
-                    const match = pickupResultsRef.current.find(r => r.display_name === loc);
-                    if (match) setPickupCoords([parseFloat(match.lat), parseFloat(match.lon)]);
-                  }}>
-                    <MapPin size={14} color="var(--primary)" style={{ flexShrink: 0, marginTop: 2 }} />
-                    <span>{loc}</span>
-                  </div>
-                ))}
+                {!isSearchingPickup &&
+                  pickupSuggestions.length > 0 &&
+                  pickupSuggestions.map((loc, i) => (
+                    <div
+                      key={i}
+                      className="suggestion-item"
+                      onClick={() => {
+                        setPickup(loc);
+                        setIsPickupOpen(false);
+                        const match = pickupResultsRef.current.find(
+                          (r) => r.display_name === loc,
+                        );
+                        if (match)
+                          setPickupCoords([
+                            parseFloat(match.lat),
+                            parseFloat(match.lon),
+                          ]);
+                      }}
+                    >
+                      <MapPin
+                        size={14}
+                        color="var(--primary)"
+                        style={{ flexShrink: 0, marginTop: 2 }}
+                      />
+                      <span>{loc}</span>
+                    </div>
+                  ))}
                 {/* Grouped local fallback when no live results */}
-                {!isSearchingPickup && pickupSuggestions.length === 0 && !pickup.trim() &&
+                {!isSearchingPickup &&
+                  pickupSuggestions.length === 0 &&
+                  !pickup.trim() &&
                   Object.entries(getAreaPlaces()).map(([area, places]) => (
                     <div key={area}>
                       <div className="area-header">{area}</div>
                       {places.map((loc, i) => (
-                        <div key={i} className="suggestion-item" onClick={() => { setPickup(loc); setIsPickupOpen(false); }}>
-                          <MapPin size={13} color="var(--primary)" style={{ flexShrink: 0, marginTop: 2 }} />
+                        <div
+                          key={i}
+                          className="suggestion-item"
+                          onClick={() => {
+                            setPickup(loc);
+                            setIsPickupOpen(false);
+                          }}
+                        >
+                          <MapPin
+                            size={13}
+                            color="var(--primary)"
+                            style={{ flexShrink: 0, marginTop: 2 }}
+                          />
                           <span>{loc}</span>
                         </div>
                       ))}
                     </div>
-                  ))
-                }
-                {!isSearchingPickup && pickupSuggestions.length === 0 && pickup.trim() && getGroupedDropoff(pickup) &&
-                  Object.entries(getGroupedDropoff(pickup)).map(([area, places]) => (
-                    <div key={area}>
-                      <div className="area-header">{area}</div>
-                      {places.map((loc, i) => (
-                        <div key={i} className="suggestion-item" onClick={() => { setPickup(loc); setIsPickupOpen(false); }}>
-                          <MapPin size={13} color="var(--primary)" style={{ flexShrink: 0, marginTop: 2 }} />
-                          <span>{loc}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ))
-                }
+                  ))}
+                {!isSearchingPickup &&
+                  pickupSuggestions.length === 0 &&
+                  pickup.trim() &&
+                  getGroupedDropoff(pickup) &&
+                  Object.entries(getGroupedDropoff(pickup)).map(
+                    ([area, places]) => (
+                      <div key={area}>
+                        <div className="area-header">{area}</div>
+                        {places.map((loc, i) => (
+                          <div
+                            key={i}
+                            className="suggestion-item"
+                            onClick={() => {
+                              setPickup(loc);
+                              setIsPickupOpen(false);
+                            }}
+                          >
+                            <MapPin
+                              size={13}
+                              color="var(--primary)"
+                              style={{ flexShrink: 0, marginTop: 2 }}
+                            />
+                            <span>{loc}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ),
+                  )}
               </div>
             )}
           </div>
@@ -439,94 +918,173 @@ const RideForm = () => {
               onFocus={() => setIsDropoffOpen(true)}
             />
             <div className="input-right-btns">
-              <button type="button" className="map-pin-btn" title="Pick on Map" onClick={() => { setIsDropoffOpen(false); setShowDropoffMap(true); }}>
+              <button
+                type="button"
+                className="map-pin-btn"
+                title="Pick on Map"
+                onClick={() => {
+                  setIsDropoffOpen(false);
+                  setShowDropoffMap(true);
+                }}
+              >
                 <Map size={16} />
               </button>
             </div>
 
             {isDropoffOpen && (
-              <div className="suggestions-dropdown rapido-dropdown animate-fade-in-up" style={{ maxHeight: '420px', overflowY: 'auto' }}>
-                <div className="use-current-location" style={{ color: '#3B82F6', borderColor: 'rgba(59,130,246,0.15)' }} onClick={() => { setIsDropoffOpen(false); setShowDropoffMap(true); }}>
+              <div
+                className="suggestions-dropdown rapido-dropdown animate-fade-in-up"
+                style={{ maxHeight: "420px", overflowY: "auto" }}
+              >
+                <div
+                  className="use-current-location"
+                  style={{
+                    color: "#3B82F6",
+                    borderColor: "rgba(59,130,246,0.15)",
+                  }}
+                  onClick={() => {
+                    setIsDropoffOpen(false);
+                    setShowDropoffMap(true);
+                  }}
+                >
                   <Map size={14} /> Pick on Map
                 </div>
                 {isSearchingDropoff && (
-                  <div className="loading-text"><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Searching...</div>
+                  <div className="loading-text">
+                    <Loader2
+                      size={14}
+                      style={{ animation: "spin 1s linear infinite" }}
+                    />{" "}
+                    Searching...
+                  </div>
                 )}
                 {/* Nominatim live results — shown first when user types */}
-                {!isSearchingDropoff && dropoffSuggestions.length > 0 && dropoffSuggestions.map((loc, i) => (
-                  <div key={i} className="suggestion-item" onClick={() => { setDropoff(loc); setIsDropoffOpen(false); }}>
-                    <Navigation size={14} color="#EF4444" style={{ flexShrink: 0, marginTop: 2 }} />
-                    <span>{loc}</span>
-                  </div>
-                ))}
+                {!isSearchingDropoff &&
+                  dropoffSuggestions.length > 0 &&
+                  dropoffSuggestions.map((loc, i) => (
+                    <div
+                      key={i}
+                      className="suggestion-item"
+                      onClick={() => {
+                        setDropoff(loc);
+                        setIsDropoffOpen(false);
+                      }}
+                    >
+                      <Navigation
+                        size={14}
+                        color="#EF4444"
+                        style={{ flexShrink: 0, marginTop: 2 }}
+                      />
+                      <span>{loc}</span>
+                    </div>
+                  ))}
                 {/* Rapido-style city/area UI when no search query */}
-                {!isSearchingDropoff && dropoffSuggestions.length === 0 && !dropoff.trim() && (
-                  <>
-                    {/* City Tabs */}
-                    <div className="city-tabs-container">
-                      <div className="city-tabs">
-                        {CITY_TABS.map(city => (
-                          <button
-                            key={city.id}
-                            className={`city-tab ${selectedCity === city.id ? 'active' : ''}`}
-                            onClick={() => { setSelectedCity(city.id); setSelectedArea('All'); }}
-                          >
-                            {city.label}
-                          </button>
-                        ))}
+                {!isSearchingDropoff &&
+                  dropoffSuggestions.length === 0 &&
+                  !dropoff.trim() && (
+                    <>
+                      {/* City Tabs */}
+                      <div className="city-tabs-container">
+                        <div className="city-tabs">
+                          {CITY_TABS.map((city) => (
+                            <button
+                              key={city.id}
+                              className={`city-tab ${selectedCity === city.id ? "active" : ""}`}
+                              onClick={() => {
+                                setSelectedCity(city.id);
+                                setSelectedArea("All");
+                              }}
+                            >
+                              {city.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                    {/* Area Chips */}
-                    <div className="area-chips-container">
-                      <div className="area-chips">
-                        {areaKeys.map(area => (
-                          <button
-                            key={area}
-                            className={`area-chip ${selectedArea === area ? 'active' : ''}`}
-                            onClick={() => setSelectedArea(area)}
-                          >
-                            {area}
-                          </button>
-                        ))}
+                      {/* Area Chips */}
+                      <div className="area-chips-container">
+                        <div className="area-chips">
+                          {areaKeys.map((area) => (
+                            <button
+                              key={area}
+                              className={`area-chip ${selectedArea === area ? "active" : ""}`}
+                              onClick={() => setSelectedArea(area)}
+                            >
+                              {area}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                    {/* Places List */}
-                    {Object.entries(getAreaPlaces()).map(([area, places]) => (
+                      {/* Places List */}
+                      {Object.entries(getAreaPlaces()).map(([area, places]) => (
+                        <div key={area}>
+                          <div className="area-header">{area}</div>
+                          {places.map((loc, i) => (
+                            <div
+                              key={i}
+                              className="suggestion-item"
+                              onClick={() => {
+                                setDropoff(loc);
+                                setIsDropoffOpen(false);
+                              }}
+                            >
+                              <Navigation
+                                size={13}
+                                color="#EF4444"
+                                style={{ flexShrink: 0, marginTop: 2 }}
+                              />
+                              <span>{loc}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </>
+                  )}
+                {/* Grouped search results when user types but no nominatim results */}
+                {!isSearchingDropoff &&
+                  dropoffSuggestions.length === 0 &&
+                  dropoff.trim() &&
+                  getGroupedDropoff(dropoff) &&
+                  Object.entries(getGroupedDropoff(dropoff)).map(
+                    ([area, places]) => (
                       <div key={area}>
                         <div className="area-header">{area}</div>
                         {places.map((loc, i) => (
-                          <div key={i} className="suggestion-item" onClick={() => { setDropoff(loc); setIsDropoffOpen(false); }}>
-                            <Navigation size={13} color="#EF4444" style={{ flexShrink: 0, marginTop: 2 }} />
+                          <div
+                            key={i}
+                            className="suggestion-item"
+                            onClick={() => {
+                              setDropoff(loc);
+                              setIsDropoffOpen(false);
+                            }}
+                          >
+                            <Navigation
+                              size={13}
+                              color="#EF4444"
+                              style={{ flexShrink: 0, marginTop: 2 }}
+                            />
                             <span>{loc}</span>
                           </div>
                         ))}
                       </div>
-                    ))}
-                  </>
-                )}
-                {/* Grouped search results when user types but no nominatim results */}
-                {!isSearchingDropoff && dropoffSuggestions.length === 0 && dropoff.trim() && getGroupedDropoff(dropoff) &&
-                  Object.entries(getGroupedDropoff(dropoff)).map(([area, places]) => (
-                    <div key={area}>
-                      <div className="area-header">{area}</div>
-                      {places.map((loc, i) => (
-                        <div key={i} className="suggestion-item" onClick={() => { setDropoff(loc); setIsDropoffOpen(false); }}>
-                          <Navigation size={13} color="#EF4444" style={{ flexShrink: 0, marginTop: 2 }} />
-                          <span>{loc}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ))
-                }
-                {!isSearchingDropoff && dropoffSuggestions.length === 0 && dropoff.trim() && getGroupedDropoff(dropoff) && Object.keys(getGroupedDropoff(dropoff)).length === 0 && (
-                  <div className="loading-text">No locations found.</div>
-                )}
+                    ),
+                  )}
+                {!isSearchingDropoff &&
+                  dropoffSuggestions.length === 0 &&
+                  dropoff.trim() &&
+                  getGroupedDropoff(dropoff) &&
+                  Object.keys(getGroupedDropoff(dropoff)).length === 0 && (
+                    <div className="loading-text">No locations found.</div>
+                  )}
               </div>
             )}
           </div>
 
-          <button type="submit" className="btn btn-primary submit-btn" disabled={loading}>
-            {loading ? 'Calculating...' : 'See Prices'}
+          <button
+            type="submit"
+            className="btn btn-primary submit-btn"
+            disabled={loading}
+          >
+            {loading ? "Calculating..." : "See Prices"}
           </button>
         </form>
 
@@ -535,52 +1093,41 @@ const RideForm = () => {
           <div className="estimations-container animate-fade-in-up">
             <div className="estimations-header">
               <span>Available Rides</span>
-              <span style={{ display: 'flex', gap: '0.75rem' }}>
+              <span style={{ display: "flex", gap: "0.75rem" }}>
                 <span>📍 {estimate.distance}</span>
                 <span>⏱ {estimate.duration}</span>
               </span>
             </div>
             <div className="estimations-list">
-              {estimate.options.map(opt => (
-                <div key={opt.id} onClick={() => setSelectedOption(opt)} className={`estimation-option ${selectedOption?.id === opt.id ? 'selected' : 'unselected'}`}>
+              {estimate.options.map((opt) => (
+                <div
+                  key={opt.id}
+                  onClick={() => setSelectedOption(opt)}
+                  className={`estimation-option ${selectedOption?.id === opt.id ? "selected" : "unselected"}`}
+                >
                   <div className="estimation-icon">{opt.iconUrl}</div>
                   <div className="estimation-details">
                     <div className="estimation-type">{opt.type}</div>
-                    <div className="estimation-desc">{opt.description} • {opt.eta}</div>
+                    <div className="estimation-desc">
+                      {opt.description} • {opt.eta}
+                    </div>
                   </div>
-                  <div className="estimation-price">{estimate.currency}{opt.price}</div>
+                  <div className="estimation-price">
+                    {estimate.currency}
+                    {opt.price}
+                  </div>
                 </div>
               ))}
             </div>
-            {selectedOption && (
-              <div className="payment-method-selector animate-fade-in-up" style={{ margin: '1rem 0', display: 'flex', gap: '0.5rem', background: '#f8f9fa', padding: '0.5rem', borderRadius: '12px' }}>
-                 <button 
-                   type="button" 
-                   onClick={() => setPaymentMethod('Cash')}
-                   style={{ flex: 1, padding: '0.8rem', border: 'none', borderRadius: '8px', background: paymentMethod === 'Cash' ? '#22c55e' : 'transparent', color: paymentMethod === 'Cash' ? '#fff' : '#666', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}>
-                   💵 Cash
-                 </button>
-                 <button 
-                   type="button" 
-                   onClick={() => setPaymentMethod('Online')}
-                   style={{ flex: 1, padding: '0.8rem', border: 'none', borderRadius: '8px', background: paymentMethod === 'Online' ? '#3b82f6' : 'transparent', color: paymentMethod === 'Online' ? '#fff' : '#666', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}>
-                   📱 Online
-                 </button>
-              </div>
-            )}
+
             {selectedOption && (
               <>
-                {!user && (
-                  <div className="ride-form-error" style={{ marginBottom: '1rem' }}>
-                    Please login or create an account before booking a ride.
-                  </div>
-                )}
                 <button
                   onClick={handleConfirmRide}
                   className="btn btn-primary book-btn animate-fade-in-up"
-                  disabled={!user || loading}
+                  disabled={loading}
                 >
-                  {loading ? 'Booking...' : `Book ${selectedOption.type} • ${paymentMethod}`}
+                  {loading ? "Booking..." : `Book ${selectedOption.type}`}
                 </button>
               </>
             )}
@@ -592,11 +1139,13 @@ const RideForm = () => {
       {showPickupMap && (
         <MapPickerModal
           title="Set Pickup Location"
-          icon={MapPin}
-          iconColor="#22C55E"
           markerIcon={greenIcon}
           initialPosition={pickupCoords || [26.8467, 80.9462]}
-          onConfirm={(addr, coords) => { setPickup(addr); setPickupCoords(coords); setShowPickupMap(false); }}
+          onConfirm={(addr, coords) => {
+            setPickup(addr);
+            setPickupCoords(coords);
+            setShowPickupMap(false);
+          }}
           onClose={() => setShowPickupMap(false)}
         />
       )}
@@ -605,11 +1154,12 @@ const RideForm = () => {
       {showDropoffMap && (
         <MapPickerModal
           title="Set Drop Location"
-          icon={Navigation}
-          iconColor="#EF4444"
           markerIcon={redIcon}
           initialPosition={pickupCoords || [26.8467, 80.9462]}
-          onConfirm={(addr, coords) => { setDropoff(addr); setShowDropoffMap(false); }}
+          onConfirm={(addr) => {
+            setDropoff(addr);
+            setShowDropoffMap(false);
+          }}
           onClose={() => setShowDropoffMap(false)}
         />
       )}

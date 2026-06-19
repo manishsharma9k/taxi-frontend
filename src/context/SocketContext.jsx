@@ -16,8 +16,8 @@ export const SocketProvider = ({ children }) => {
       
       newSocket.on('connect', () => {
         console.log('Connected to socket server');
-        // Join a personal room to receive private events (like ride-accepted)
-        newSocket.emit('join-room', user.id);
+        // Identify the user or captain with their role and ID
+        newSocket.emit('identify', { role: user.role || 'user', id: user.id || user._id });
       });
 
       setSocket(newSocket);

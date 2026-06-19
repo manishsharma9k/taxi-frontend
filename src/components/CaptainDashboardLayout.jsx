@@ -1,32 +1,40 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import "./CSS/CaptainDashboardLayout.css";
 import {
-  FaThLarge, FaRoute, FaHistory, FaWallet, FaUser,
-  FaSignOutAlt, FaBars, FaMotorcycle, FaStar, FaComments
+  FaThLarge,
+  FaRoute,
+  FaHistory,
+  FaWallet,
+  FaUser,
+  FaSignOutAlt,
+  FaBars,
+  FaMotorcycle,
+  FaStar,
+  FaComments,
 } from "react-icons/fa";
 import { Toaster } from "react-hot-toast";
 import Swal from "sweetalert2";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Clock, XCircle, ShieldCheck, LogOut } from 'lucide-react';
-import { io } from 'socket.io-client';
+import { Clock, XCircle, ShieldCheck, LogOut } from "lucide-react";
+import { io } from "socket.io-client";
 import CaptainOverview from "./CaptainOverview";
 import CaptainActiveRides from "./CaptainActiveRides";
 import CaptainRideHistory from "./CaptainRideHistory";
 import CaptainEarnings from "./CaptainEarnings";
 import CaptainProfile from "./CaptainProfile";
 import CaptainChat from "./CaptainChat";
-import { API_URL } from '../api.js';
+import { API_URL } from "../api.js";
 
 const socket = io(API_URL, { autoConnect: false });
 
 const TABS = [
-  { id: "overview",      label: "Overview",      icon: <FaThLarge /> },
-  { id: "active-rides",  label: "Ride Requests", icon: <FaRoute /> },
-  { id: "history",       label: "Ride History",  icon: <FaHistory /> },
-  { id: "earnings",      label: "Earnings",      icon: <FaWallet /> },
-  { id: "chat",          label: "Chat Admin",    icon: <FaComments /> },
-  { id: "profile",       label: "My Profile",    icon: <FaUser /> },
+  { id: "overview", label: "Overview", icon: <FaThLarge /> },
+  { id: "active-rides", label: "Ride Requests", icon: <FaRoute /> },
+  { id: "history", label: "Ride History", icon: <FaHistory /> },
+  { id: "earnings", label: "Earnings", icon: <FaWallet /> },
+  { id: "chat", label: "Chat Admin", icon: <FaComments /> },
+  { id: "profile", label: "My Profile", icon: <FaUser /> },
 ];
 
 const CaptainDashboardLayout = () => {
@@ -47,28 +55,34 @@ const CaptainDashboardLayout = () => {
   useEffect(() => {
     if (!user?.id) return;
     socket.connect();
-    socket.emit('identify', { role: 'captain', id: user.id });
+    socket.emit("identify", { role: "captain", id: user.id });
     // Fetch current online status from server
     fetch(`${API_URL}/api/captains/me`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).then(r => r.json()).then(d => {
-      if (d.isOnline) setIsOnline(true);
-    }).catch(() => {});
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.isOnline) setIsOnline(true);
+      })
+      .catch(() => {});
 
-    socket.on('ride:new', (data) => {
+    socket.on("ride:new", (data) => {
       setIncomingRide(data);
       setIncomingTimer(15); // 15 seconds to accept
     });
 
-    return () => { 
-      socket.off('ride:new');
-      socket.disconnect(); 
+    return () => {
+      socket.off("ride:new");
+      socket.disconnect();
     };
   }, [user?.id, token]);
 
   useEffect(() => {
     if (incomingTimer > 0) {
-      const timerId = setTimeout(() => setIncomingTimer(prev => prev - 1), 1000);
+      const timerId = setTimeout(
+        () => setIncomingTimer((prev) => prev - 1),
+        1000,
+      );
       return () => clearTimeout(timerId);
     } else if (incomingTimer === 0 && incomingRide) {
       setIncomingRide(null); // auto reject/ignore
@@ -79,8 +93,11 @@ const CaptainDashboardLayout = () => {
     if (!incomingRide) return;
     try {
       const res = await fetch(`${API_URL}/api/rides/accept`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ rideId: incomingRide.rideId }),
       });
       const data = await res.json();
@@ -89,11 +106,15 @@ const CaptainDashboardLayout = () => {
         setActiveTab("active-rides");
         // We do not show Swal.fire here to keep it seamless like Rapido
       } else {
-        Swal.fire('Error', data.message || 'Ride already accepted by another captain', 'error');
+        Swal.fire(
+          "Error",
+          data.message || "Ride already accepted by another captain",
+          "error",
+        );
         setIncomingRide(null);
       }
     } catch {
-      Swal.fire('Error', 'Network error', 'error');
+      Swal.fire("Error", "Network error", "error");
     }
   };
 
@@ -111,18 +132,21 @@ const CaptainDashboardLayout = () => {
       const lng = coords.longitude;
       if (!lat || !lng) return;
 
-      socket.emit('captain:location', { captainId: user.id, lat, lng });
+      socket.emit("captain:location", { captainId: user.id, lat, lng });
       await fetch(`${API_URL}/api/captains/location`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ lat, lng, isOnline: true })
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ lat, lng, isOnline: true }),
       }).catch(() => {});
     };
 
     locationWatcher.current = navigator.geolocation.watchPosition(
       updateLocation,
       () => {},
-      { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 }
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 },
     );
 
     return () => {
@@ -144,8 +168,28 @@ const CaptainDashboardLayout = () => {
       confirmButtonText: "Yes, Logout",
       background: "#141414",
       color: "#fff",
-    }).then((r) => {
-      if (r.isConfirmed) { logout(); navigate("/"); }
+    }).then(async (r) => {
+      if (!r.isConfirmed) return;
+
+      // Mark captain offline before logout to stop ride pings immediately
+      try {
+        if (user?.id) socket.emit("captain:offline", { captainId: user.id });
+        if (token) {
+          await fetch(`${API_URL}/api/captains/location`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ isOnline: false }),
+          });
+        }
+      } catch (e) {
+        console.warn("Captain offline update failed during logout", e);
+      }
+
+      logout();
+      navigate("/");
     });
   };
 
@@ -154,17 +198,22 @@ const CaptainDashboardLayout = () => {
     setIsOnline(next);
     // Update online status only; do not clear existing location
     await fetch(`${API_URL}/api/captains/location`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ isOnline: next })
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ isOnline: next }),
     }).catch(() => {});
     // If going offline, emit socket event
     if (!next && user?.id) {
-      socket.emit('captain:offline', { captainId: user.id });
+      socket.emit("captain:offline", { captainId: user.id });
     }
     Swal.fire({
       title: next ? "You are Online!" : "You are Offline",
-      text: next ? "You will now receive ride requests." : "You won't receive new ride requests.",
+      text: next
+        ? "You will now receive ride requests."
+        : "You won't receive new ride requests.",
       icon: next ? "success" : "info",
       timer: 1800,
       showConfirmButton: false,
@@ -175,35 +224,118 @@ const CaptainDashboardLayout = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "overview":     return <CaptainOverview setActiveTab={setActiveTab} />;
-      case "active-rides": return <CaptainActiveRides isOnline={isOnline} />;
-      case "history":      return <CaptainRideHistory />;
-      case "earnings":     return <CaptainEarnings />;
-      case "chat":         return <CaptainChat />;
-      case "profile":      return <CaptainProfile />;
-      default:             return <CaptainOverview setActiveTab={setActiveTab} />;
+      case "overview":
+        return <CaptainOverview setActiveTab={setActiveTab} />;
+      case "active-rides":
+        return <CaptainActiveRides isOnline={isOnline} />;
+      case "history":
+        return <CaptainRideHistory />;
+      case "earnings":
+        return <CaptainEarnings />;
+      case "chat":
+        return <CaptainChat />;
+      case "profile":
+        return <CaptainProfile />;
+      default:
+        return <CaptainOverview setActiveTab={setActiveTab} />;
     }
   };
 
   if (!user || user.role !== "captain") return null;
 
   // Pending approval guard
-  if (user.approvalStatus === 'pending') {
+  if (user.approvalStatus === "pending") {
     return (
-      <div style={{ minHeight: '100vh', background: '#0d0d0d', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-        <div style={{ background: '#141414', border: '1px solid #222', borderRadius: '16px', padding: '3rem 2.5rem', maxWidth: '420px', width: '100%', textAlign: 'center' }}>
-          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(245,158,11,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "#0d0d0d",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "2rem",
+        }}
+      >
+        <div
+          style={{
+            background: "#141414",
+            border: "1px solid #222",
+            borderRadius: "16px",
+            padding: "3rem 2.5rem",
+            maxWidth: "420px",
+            width: "100%",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: "50%",
+              background: "rgba(245,158,11,0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 1.5rem",
+            }}
+          >
             <Clock size={36} color="#F59E0B" />
           </div>
-          <h2 style={{ color: '#fff', fontWeight: '800', fontSize: '1.4rem', marginBottom: '0.75rem' }}>Under Review</h2>
-          <p style={{ color: '#888', fontSize: '0.9rem', lineHeight: 1.7, marginBottom: '1.5rem' }}>
-            Hey <strong style={{ color: '#fff' }}>{user.name}</strong>! Your captain profile is being reviewed by our team. We'll notify you once approved — usually within 2 hours.
+          <h2
+            style={{
+              color: "#fff",
+              fontWeight: "800",
+              fontSize: "1.4rem",
+              marginBottom: "0.75rem",
+            }}
+          >
+            Under Review
+          </h2>
+          <p
+            style={{
+              color: "#888",
+              fontSize: "0.9rem",
+              lineHeight: 1.7,
+              marginBottom: "1.5rem",
+            }}
+          >
+            Hey <strong style={{ color: "#fff" }}>{user.name}</strong>! Your
+            captain profile is being reviewed by our team. We'll notify you once
+            approved — usually within 2 hours.
           </p>
-          <div style={{ background: '#1a1a1a', border: '1px solid #222', borderRadius: '10px', padding: '0.85rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+          <div
+            style={{
+              background: "#1a1a1a",
+              border: "1px solid #222",
+              borderRadius: "10px",
+              padding: "0.85rem 1rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+              marginBottom: "1.5rem",
+            }}
+          >
             <ShieldCheck size={18} color="#22C55E" />
-            <span style={{ fontSize: '0.82rem', color: '#888' }}>Verification in progress — sit tight!</span>
+            <span style={{ fontSize: "0.82rem", color: "#888" }}>
+              Verification in progress — sit tight!
+            </span>
           </div>
-          <button onClick={() => { logout(); navigate('/'); }} style={{ background: 'none', border: '1px solid #333', color: '#888', borderRadius: '8px', padding: '0.6rem 1.2rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 auto', fontSize: '0.85rem' }}>
+          <button
+            onClick={handleLogout}
+            style={{
+              background: "none",
+              border: "1px solid #333",
+              color: "#888",
+              borderRadius: "8px",
+              padding: "0.6rem 1.2rem",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              margin: "0 auto",
+              fontSize: "0.85rem",
+            }}
+          >
             <LogOut size={15} /> Logout
           </button>
         </div>
@@ -212,18 +344,84 @@ const CaptainDashboardLayout = () => {
   }
 
   // Rejected guard
-  if (user.approvalStatus === 'rejected') {
+  if (user.approvalStatus === "rejected") {
     return (
-      <div style={{ minHeight: '100vh', background: '#0d0d0d', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-        <div style={{ background: '#141414', border: '1px solid #222', borderRadius: '16px', padding: '3rem 2.5rem', maxWidth: '420px', width: '100%', textAlign: 'center' }}>
-          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "#0d0d0d",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "2rem",
+        }}
+      >
+        <div
+          style={{
+            background: "#141414",
+            border: "1px solid #222",
+            borderRadius: "16px",
+            padding: "3rem 2.5rem",
+            maxWidth: "420px",
+            width: "100%",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: "50%",
+              background: "rgba(239,68,68,0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 1.5rem",
+            }}
+          >
             <XCircle size={36} color="#EF4444" />
           </div>
-          <h2 style={{ color: '#EF4444', fontWeight: '800', fontSize: '1.4rem', marginBottom: '0.75rem' }}>Application Rejected</h2>
-          <p style={{ color: '#888', fontSize: '0.9rem', lineHeight: 1.7, marginBottom: '1.5rem' }}>
-            Sorry <strong style={{ color: '#fff' }}>{user.name}</strong>, your application was not approved. Please contact our support team for more details.
+          <h2
+            style={{
+              color: "#EF4444",
+              fontWeight: "800",
+              fontSize: "1.4rem",
+              marginBottom: "0.75rem",
+            }}
+          >
+            Application Rejected
+          </h2>
+          <p
+            style={{
+              color: "#888",
+              fontSize: "0.9rem",
+              lineHeight: 1.7,
+              marginBottom: "1.5rem",
+            }}
+          >
+            Sorry <strong style={{ color: "#fff" }}>{user.name}</strong>, your
+            application was not approved. Please contact our support team for
+            more details.
           </p>
-          <button onClick={() => { logout(); navigate('/'); }} style={{ background: '#EF4444', border: 'none', color: '#fff', borderRadius: '8px', padding: '0.7rem 1.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 auto', fontWeight: '600' }}>
+          <button
+            onClick={() => {
+              logout();
+              navigate("/");
+            }}
+            style={{
+              background: "#EF4444",
+              border: "none",
+              color: "#fff",
+              borderRadius: "8px",
+              padding: "0.7rem 1.5rem",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              margin: "0 auto",
+              fontWeight: "600",
+            }}
+          >
             <LogOut size={15} /> Logout
           </button>
         </div>
@@ -242,13 +440,19 @@ const CaptainDashboardLayout = () => {
         <div className="cdl-logo-row">
           {!collapsed && <span className="cdl-logo-text">Captain Panel</span>}
           {collapsed && <FaMotorcycle size={22} color="#FFD700" />}
-          <button className="cdl-toggle" onClick={() => setCollapsed((c) => !c)}>
+          <button
+            className="cdl-toggle"
+            onClick={() => setCollapsed((c) => !c)}
+          >
             <FaBars />
           </button>
         </div>
 
         {/* Online toggle */}
-        <button className={`cdl-online-btn ${isOnline ? "online" : ""}`} onClick={toggleOnline}>
+        <button
+          className={`cdl-online-btn ${isOnline ? "online" : ""}`}
+          onClick={toggleOnline}
+        >
           <span className="cdl-dot" />
           {!collapsed && <span>{isOnline ? "Online" : "Go Online"}</span>}
         </button>
@@ -287,7 +491,9 @@ const CaptainDashboardLayout = () => {
               <div className="cdl-avatar">{user?.name?.[0]?.toUpperCase()}</div>
               <div>
                 <div className="cdl-uname">{user?.name}</div>
-                <div className="cdl-rating"><FaStar size={11} color="#FFD700" /> {user?.rating || "5.0"}</div>
+                <div className="cdl-rating">
+                  <FaStar size={11} color="#FFD700" /> {user?.rating || "5.0"}
+                </div>
               </div>
             </div>
           </div>
@@ -302,27 +508,65 @@ const CaptainDashboardLayout = () => {
           <div className="rapido-incoming-card">
             <div className="ric-timer">
               <svg width="60" height="60" viewBox="0 0 60 60">
-                <circle cx="30" cy="30" r="28" fill="none" stroke="#e5e7eb" strokeWidth="4" />
-                <circle cx="30" cy="30" r="28" fill="none" stroke="#22c55e" strokeWidth="4" 
-                        strokeDasharray="175" strokeDashoffset={175 - (175 * incomingTimer) / 15}
-                        style={{ transition: 'stroke-dashoffset 1s linear', transform: 'rotate(-90deg)', transformOrigin: '50% 50%' }} />
+                <circle
+                  cx="30"
+                  cy="30"
+                  r="28"
+                  fill="none"
+                  stroke="#e5e7eb"
+                  strokeWidth="4"
+                />
+                <circle
+                  cx="30"
+                  cy="30"
+                  r="28"
+                  fill="none"
+                  stroke="#22c55e"
+                  strokeWidth="4"
+                  strokeDasharray="175"
+                  strokeDashoffset={175 - (175 * incomingTimer) / 15}
+                  style={{
+                    transition: "stroke-dashoffset 1s linear",
+                    transform: "rotate(-90deg)",
+                    transformOrigin: "50% 50%",
+                  }}
+                />
               </svg>
               <div className="ric-time">{incomingTimer}</div>
             </div>
-            
+
             <div className="ric-title">New Ride Request</div>
             <div className="ric-fare">₹{incomingRide.fare}</div>
-            <div className="ric-dist">Estimated Fare • {incomingRide.vehicleType?.toUpperCase() || 'CAB'}</div>
-            
+            <div className="ric-dist">
+              Estimated Fare •{" "}
+              {incomingRide.vehicleType?.toUpperCase() || "CAB"}
+            </div>
+
             <div className="ric-route">
-              <div className="ric-route-row"><div className="rbs-dot-green"></div><div className="rbs-loc-text">{incomingRide.pickup}</div></div>
-              <div className="rbs-route-line-v" style={{margin:'4px 0 4px 4px', height:'16px'}}></div>
-              <div className="ric-route-row"><div className="rbs-dot-red"></div><div className="rbs-loc-text">{incomingRide.dropoff}</div></div>
+              <div className="ric-route-row">
+                <div className="rbs-dot-green"></div>
+                <div className="rbs-loc-text">{incomingRide.pickup}</div>
+              </div>
+              <div
+                className="rbs-route-line-v"
+                style={{ margin: "4px 0 4px 4px", height: "16px" }}
+              ></div>
+              <div className="ric-route-row">
+                <div className="rbs-dot-red"></div>
+                <div className="rbs-loc-text">{incomingRide.dropoff}</div>
+              </div>
             </div>
 
             <div className="ric-actions">
-              <button className="ric-btn-reject" onClick={() => setIncomingRide(null)}>DECLINE</button>
-              <button className="ric-btn-accept" onClick={handleAcceptRide}>ACCEPT RIDE</button>
+              <button
+                className="ric-btn-reject"
+                onClick={() => setIncomingRide(null)}
+              >
+                DECLINE
+              </button>
+              <button className="ric-btn-accept" onClick={handleAcceptRide}>
+                ACCEPT RIDE
+              </button>
             </div>
           </div>
         </div>

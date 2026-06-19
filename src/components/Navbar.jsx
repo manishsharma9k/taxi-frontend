@@ -1,99 +1,141 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { User as UserIcon, LogOut, Sun, Moon, Menu, X } from 'lucide-react';
-import { useContext, useState, useEffect } from 'react';
-import { AuthContext } from '../context/AuthContext';
-import { API_URL } from '../api.js';
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { User as UserIcon, LogOut, Sun, Moon, Menu, X } from "lucide-react";
+import { useContext, useState, useEffect } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { API_URL } from "../api.js";
 
 const Navbar = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, isAuthenticated } = useContext(AuthContext);
+  const fallbackName = localStorage.getItem("qr_user_name") || "Account";
   const navigate = useNavigate();
   const location = useLocation();
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [menuLinks, setMenuLinks] = useState([
-    { label: 'Ride', path: '/', visible: true },
-    { label: 'Drive', path: '/drive', visible: true },
-    { label: 'About', path: '/about', visible: true },
-    { label: 'Contact', path: '/contact', visible: true },
+    { label: "Ride", path: "/", visible: true },
+    { label: "Drive", path: "/drive", visible: true },
+    { label: "About", path: "/about", visible: true },
+    { label: "Contact", path: "/contact", visible: true },
   ]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
     const fetchLinks = async () => {
       try {
         const res = await fetch(`${API_URL}/api/admin/header-links`);
-        if (!res.ok) throw new Error('Header links fetch failed');
+        if (!res.ok) throw new Error("Header links fetch failed");
         const data = await res.json();
         const visibleLinks = data.filter((link) => link.visible !== false);
         const normalizedLinks = visibleLinks.map((link) => ({
           ...link,
-          path: link.path?.startsWith('/') ? link.path : `/${link.path}`,
+          path: link.path?.startsWith("/") ? link.path : `/${link.path}`,
         }));
         normalizedLinks.sort((a, b) => (a.order || 0) - (b.order || 0));
         setMenuLinks(normalizedLinks);
       } catch (err) {
-        console.warn('Navbar header link load failed:', err.message);
+        console.warn("Navbar header link load failed:", err.message);
       }
     };
     fetchLinks();
   }, []);
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
-  useEffect(() => { setMenuOpen(false); }, [location]);
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location]);
 
-  const handleLogout = () => { logout(); navigate('/'); };
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
   const isActive = (path) => location.pathname === path;
 
   // Hide navbar on admin/captain dashboard pages
-  const hiddenRoutes = ['/dashboard', '/captain-dashboard', '/captain-panel'];
+  const hiddenRoutes = ["/dashboard", "/captain-dashboard", "/captain-panel"];
   if (hiddenRoutes.includes(location.pathname)) return null;
 
   return (
-    <nav className="navbar" style={{
-      background: scrolled
-        ? theme === 'dark' ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.97)'
-        : theme === 'dark' ? 'rgba(10, 22, 40, 0.93)' : 'rgba(245, 243, 255, 0.96)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      borderBottom: 'none',
-      boxShadow: scrolled ? '0 4px 20px rgba(0,0,0,0.1)' : 'none',
-      transition: 'background 0.4s ease, box-shadow 0.4s ease',
-    }}>
+    <nav
+      className="navbar"
+      style={{
+        background: scrolled
+          ? theme === "dark"
+            ? "rgba(255,255,255,0.97)"
+            : "rgba(255,255,255,0.97)"
+          : theme === "dark"
+            ? "rgba(10, 22, 40, 0.93)"
+            : "rgba(245, 243, 255, 0.96)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderBottom: "none",
+        boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.1)" : "none",
+        transition: "background 0.4s ease, box-shadow 0.4s ease",
+      }}
+    >
       <div className="container nav-container">
         {/* Logo */}
-        <Link to="/" className="logo" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+        <Link
+          to="/"
+          className="logo"
+          style={{
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            textDecoration: "none",
+          }}
+        >
           <div className="logo-icon-wrap">
             <div className="logo-ring" />
             <img
               src="/images/taxinova_logo.png"
               alt="TaxiNova Logi"
               className="logo-img"
-              style={{ height: '38px', width: '38px', objectFit: 'contain', position: 'relative', zIndex: 1 }}
+              style={{
+                height: "38px",
+                width: "38px",
+                objectFit: "contain",
+                position: "relative",
+                zIndex: 1,
+              }}
             />
-          </div>          <span className="logo-text" style={{ fontSize: '1.25rem', fontWeight: '900', letterSpacing: '-0.02em', color: 'var(--text)', position: 'relative' }}>
+          </div>{" "}
+          <span
+            className="logo-text"
+            style={{
+              fontSize: "1.25rem",
+              fontWeight: "900",
+              letterSpacing: "-0.02em",
+              color: "var(--text)",
+              position: "relative",
+            }}
+          >
             Taxi<span className="logo-nova">Nova</span>
             <span className="logo-shimmer" />
-          </span>        </Link>
+          </span>{" "}
+        </Link>
 
         {/* Desktop Nav */}
-        <div className="nav-links" style={{ display: 'flex' }}>
+        <div className="nav-links" style={{ display: "flex" }}>
           {menuLinks.map((link) => {
-            const safePath = link.path?.startsWith('/') ? link.path : `/${link.path}`;
+            const safePath = link.path?.startsWith("/")
+              ? link.path
+              : `/${link.path}`;
             return (
               <Link
                 key={link._id || link.label}
                 to={safePath}
-                className={`nav-link${isActive(safePath) ? ' active' : ''}`}
+                className={`nav-link${isActive(safePath) ? " active" : ""}`}
               >
                 {link.label}
               </Link>
@@ -101,30 +143,86 @@ const Navbar = () => {
           })}
 
           <button
-            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
             className="btn btn-ghost"
-            style={{ padding: '0.4rem 0.6rem', marginLeft: '0.25rem' }}
+            style={{ padding: "0.4rem 0.6rem", marginLeft: "0.25rem" }}
             aria-label="Toggle theme"
           >
-            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
           </button>
 
-          {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: '0.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 0.75rem', background: 'var(--bg-3)', borderRadius: '100px', border: '1px solid var(--border)' }}>
-                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {isAuthenticated ? (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                marginLeft: "0.5rem",
+              }}
+            >
+              <Link
+                to="/profile"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.35rem 0.75rem",
+                  background: "var(--bg-3)",
+                  borderRadius: "100px",
+                  border: "1px solid var(--border)",
+                  textDecoration: "none"
+                }}
+              >
+                <div
+                  style={{
+                    width: "26px",
+                    height: "26px",
+                    borderRadius: "50%",
+                    background: "var(--primary)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
                   <UserIcon size={13} color="#0D0D0D" />
                 </div>
-                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--text)' }}>{user.name?.split(' ')[0]}</span>
-              </div>
-              <button onClick={handleLogout} className="btn btn-ghost" style={{ padding: '0.4rem 0.6rem' }} title="Logout">
+                <span
+                  style={{
+                    fontSize: "0.875rem",
+                    fontWeight: "600",
+                    color: "var(--text)",
+                  }}
+                >
+                  {(user?.name || fallbackName).split(" ")[0]}
+                </span>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="btn btn-ghost"
+                style={{ padding: "0.4rem 0.6rem" }}
+                title="Logout"
+              >
                 <LogOut size={16} />
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', gap: '0.5rem', marginLeft: '0.5rem' }}>
-              <Link to="/login" className="btn btn-ghost" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>Log in</Link>
-              <Link to="/signup" className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>Sign up</Link>
+            <div
+              style={{ display: "flex", gap: "0.5rem", marginLeft: "0.5rem" }}
+            >
+              <Link
+                to="/login"
+                className="btn btn-ghost"
+                style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}
+              >
+                Log in
+              </Link>
+              <Link
+                to="/signup"
+                className="btn btn-primary"
+                style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}
+              >
+                Sign up
+              </Link>
             </div>
           )}
         </div>
@@ -132,8 +230,8 @@ const Navbar = () => {
         {/* Mobile Hamburger */}
         <button
           className="btn btn-ghost"
-          style={{ display: 'none', padding: '0.4rem' }}
-          onClick={() => setMenuOpen(o => !o)}
+          style={{ display: "none", padding: "0.4rem" }}
+          onClick={() => setMenuOpen((o) => !o)}
           id="mobile-menu-btn"
           aria-label="Menu"
         >
@@ -143,11 +241,26 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div style={{ background: 'var(--bg-2)', borderTop: '1px solid var(--border)', padding: '1rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div
+          style={{
+            background: "var(--bg-2)",
+            borderTop: "1px solid var(--border)",
+            padding: "1rem 1.5rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.5rem",
+          }}
+        >
           {menuLinks.map((link) => {
-            const safePath = link.path?.startsWith('/') ? link.path : `/${link.path}`;
+            const safePath = link.path?.startsWith("/")
+              ? link.path
+              : `/${link.path}`;
             return (
-              <Link key={link._id || link.label} to={safePath} className="nav-link">
+              <Link
+                key={link._id || link.label}
+                to={safePath}
+                className="nav-link"
+              >
                 {link.label}
               </Link>
             );
@@ -155,21 +268,48 @@ const Navbar = () => {
 
           {/* Theme toggle */}
           <button
-            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
             className="btn btn-ghost"
-            style={{ justifyContent: 'flex-start', gap: '0.6rem', padding: '0.5rem 0', marginTop: '0.25rem' }}
+            style={{
+              justifyContent: "flex-start",
+              gap: "0.6rem",
+              padding: "0.5rem 0",
+              marginTop: "0.25rem",
+            }}
           >
-            {theme === 'dark' ? <><Sun size={16} /> Light Mode</> : <><Moon size={16} /> Dark Mode</>}
+            {theme === "dark" ? (
+              <>
+                <Sun size={16} /> Light Mode
+              </>
+            ) : (
+              <>
+                <Moon size={16} /> Dark Mode
+              </>
+            )}
           </button>
 
-          {user ? (
-            <button onClick={handleLogout} className="btn btn-outline" style={{ marginTop: '0.25rem', justifyContent: 'flex-start' }}>
+          {isAuthenticated ? (
+            <button
+              onClick={handleLogout}
+              className="btn btn-outline"
+              style={{ marginTop: "0.25rem", justifyContent: "flex-start" }}
+            >
               <LogOut size={16} /> Logout
             </button>
           ) : (
-            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-              <Link to="/login" className="btn btn-outline" style={{ flex: 1 }}>Log in</Link>
-              <Link to="/signup" className="btn btn-primary" style={{ flex: 1 }}>Sign up</Link>
+            <div
+              style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}
+            >
+              <Link to="/login" className="btn btn-outline" style={{ flex: 1 }}>
+                Log in
+              </Link>
+              <Link
+                to="/signup"
+                className="btn btn-primary"
+                style={{ flex: 1 }}
+              >
+                Sign up
+              </Link>
             </div>
           )}
         </div>

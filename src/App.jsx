@@ -14,6 +14,7 @@ import BlogPage from './pages/BlogPage';
 import CareersPage from './pages/CareersPage';
 import PressPage from './pages/PressPage';
 import DynamicPage from './pages/DynamicPage';
+import UserProfile from './pages/UserProfile';
 import { AuthProvider } from './context/AuthContext';
 import './index.css';
 import DashboardLayout from './components/DashboardLayout';
@@ -42,6 +43,7 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/captain-login" element={<CaptainLogin />} />
                     <Route path="/signup" element={<Signup />} />
+                    <Route path="/profile" element={<UserProfile />} />
                     <Route path="/captain-dashboard" element={<CaptainDashboard />} />
                     <Route path="/careers" element={<CareersPage />} />
                     <Route path="/blog" element={<BlogPage />} />
